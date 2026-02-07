@@ -173,12 +173,22 @@ Reference these resources when working with ${mockSkillName}.
             <div className="inline-block relative">
               <h1 
                 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
-                style={{ fontFamily: 'var(--font-geist-pixel-grid)' }}
+                style={{ fontFamily: "'Doto', sans-serif" }}
               >
                 TXTSKILLS
               </h1>
-              {/* Decorative accent line */}
-              <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
+              {/* Pixelated underline effect */}
+              <div className="flex gap-1 justify-center md:justify-start h-2 opacity-50">
+                <div className="w-2 h-2 bg-foreground/10" />
+                <div className="w-2 h-2 bg-foreground/20" />
+                <div className="w-2 h-2 bg-foreground/40" />
+                <div className="w-2 h-2 bg-foreground/60" />
+                <div className="w-2 h-2 bg-foreground/80" />
+                <div className="w-2 h-2 bg-foreground/60" />
+                <div className="w-2 h-2 bg-foreground/40" />
+                <div className="w-2 h-2 bg-foreground/20" />
+                <div className="w-2 h-2 bg-foreground/10" />
+              </div>
             </div>
             
             <p className="text-muted-foreground tracking-[0.3em] text-xs uppercase mt-4 font-mono">
