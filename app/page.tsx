@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@/components/icons/agent-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -169,29 +170,15 @@ Reference these resources when working with ${mockSkillName}.
           
           {/* Main title section */}
           <div className="text-center md:text-left">
-            <div className="flex items-start justify-between gap-4">
-              <div className="inline-block relative">
-                <h1 
-                  className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
-                  style={{ fontFamily: 'var(--font-geist-pixel-grid)' }}
-                >
-                  TXTSKILLS
-                </h1>
-                {/* Decorative accent line */}
-                <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
-              </div>
-              
-              <a 
-                href="https://github.com/llmskills/txtskills" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono flex items-center gap-2 mt-2 shrink-0"
+            <div className="inline-block relative">
+              <h1 
+                className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
+                style={{ fontFamily: 'var(--font-geist-pixel-grid)' }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                GitHub
-              </a>
+                TXTSKILLS
+              </h1>
+              {/* Decorative accent line */}
+              <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
             </div>
             
             <p className="text-muted-foreground tracking-[0.3em] text-xs uppercase mt-4 font-mono">
@@ -201,45 +188,6 @@ Reference these resources when working with ${mockSkillName}.
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-4 leading-relaxed mx-auto md:mx-0">
               Convert any <code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono">llms.txt</code> documentation into an installable skill for AI agents.
             </p>
-            
-            {/* Works With - Agent Compatibility */}
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider mr-1">Works with</span>
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Claude Code */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-400">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                  </svg>
-                  <span className="text-xs font-medium">Claude Code</span>
-                </div>
-                {/* Cursor */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                    <path d="M5 12h14"/><path d="M12 5v14"/>
-                  </svg>
-                  <span className="text-xs font-medium">Cursor</span>
-                </div>
-                {/* Windsurf */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-cyan-400">
-                    <path d="M2 12c2-4 6-6 10-6s8 2 10 6c-2 4-6 6-10 6s-8-2-10-6z"/>
-                  </svg>
-                  <span className="text-xs font-medium">Windsurf</span>
-                </div>
-                {/* GitHub Copilot */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-purple-400">
-                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/>
-                  </svg>
-                  <span className="text-xs font-medium">Copilot</span>
-                </div>
-                {/* More */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground">
-                  <span className="text-xs">+ more</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Decorative corner elements */}
@@ -302,6 +250,47 @@ Reference these resources when working with ${mockSkillName}.
                   </Button>
                 </TabsPanel>
               </Tabs>
+
+              {/* Works With - Agent Compatibility */}
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider mr-1">Works with</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Claude Code */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
+                    <ClaudeIcon className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium">Claude Code</span>
+                  </div>
+                  {/* Cursor */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
+                    <CursorIcon className="w-3.5 h-3.5 text-foreground" />
+                    <span className="text-xs font-medium">Cursor</span>
+                  </div>
+                  {/* Windsurf */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
+                    <WindsurfIcon className="w-3.5 h-3.5 text-teal-400" />
+                    <span className="text-xs font-medium">Windsurf</span>
+                  </div>
+                  {/* GitHub Copilot */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
+                    <CopilotIcon className="w-3.5 h-3.5 text-foreground" />
+                    <span className="text-xs font-medium">Copilot</span>
+                  </div>
+                  {/* Amp */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
+                    <AmpIcon className="w-3.5 h-3.5 text-foreground" />
+                    <span className="text-xs font-medium">Amp</span>
+                  </div>
+                  {/* Antigravity */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
+                    <AntigravityIcon className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium">Antigravity</span>
+                  </div>
+                  {/* More */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground">
+                    <span className="text-xs">+ more</span>
+                  </div>
+                </div>
+              </div>
             </section>
           </div>
         )}
@@ -389,7 +378,7 @@ Reference these resources when working with ${mockSkillName}.
         {/* Error State */}
         {state === "error" && error && (
           <div className="space-y-6">
-            <Alert variant="destructive">
+            <Alert variant="error">
               <AlertDescription>
                 <p className="font-medium">{error.message}</p>
                 {error.suggestion && (
