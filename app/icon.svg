@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="16" fill="#09090b"/>
+  
+  <!-- Lowercase t shape constructed with blocks -->
+  <!-- Vertical stem -->
+  <rect x="28" y="12" width="8" height="28" fill="white"/>
+  <!-- Cross bar -->
+  <rect x="20" y="24" width="24" height="8" fill="white"/>
+  <!-- Bottom curve/foot -->
+  <rect x="28" y="40" width="16" height="8" fill="white"/>
+  <rect x="44" y="32" width="8" height="8" fill="white"/>
+</svg>

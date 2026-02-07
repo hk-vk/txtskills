@@ -175,7 +175,7 @@ Reference these resources when working with ${mockSkillName}.
                 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
                 style={{ fontFamily: "'Doto', sans-serif" }}
               >
-                TXTSKILLS
+                txtskills
               </h1>
               {/* Pixelated underline effect */}
               <div className="flex gap-1 justify-center md:justify-start h-2 opacity-50">
@@ -220,7 +220,7 @@ Reference these resources when working with ${mockSkillName}.
                 </TabsList>
 
                 <TabsPanel value="url">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="flex-1 relative">
                       <GlobeIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                       <Input
@@ -333,9 +333,9 @@ Reference these resources when working with ${mockSkillName}.
               <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
                 Install Command
               </h2>
-              <div className="flex items-center gap-3 bg-card border border-border rounded-lg p-4">
-                <span className="text-muted-foreground font-mono">$</span>
-                <code className="flex-1 font-mono text-sm">{result.command}</code>
+              <div className="flex items-center gap-3 bg-card border border-border rounded-lg p-4 overflow-hidden">
+                <span className="text-muted-foreground font-mono shrink-0">$</span>
+                <code className="flex-1 font-mono text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">{result.command}</code>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -352,8 +352,8 @@ Reference these resources when working with ${mockSkillName}.
                 Skill Created
               </h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono">{result.skillName}</span>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-mono break-all">{result.skillName}</span>
                   <a
                     href={result.githubUrl}
                     target="_blank"
