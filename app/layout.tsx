@@ -9,8 +9,24 @@ import "./globals.css";
 const geistPixel = GeistPixelCircle;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+  ),
   title: "txtskills - Convert llms.txt to Agent Skills",
   description: "Transform any llms.txt documentation into installable agent skills for Claude Code, Cursor, Windsurf, and more.",
+  openGraph: {
+    title: "txtskills - Convert llms.txt to Agent Skills",
+    description: "Transform any llms.txt documentation into installable agent skills for Claude Code, Cursor, Windsurf, and more.",
+    siteName: "txtskills",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "txtskills - llms.txt to agent skills" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "txtskills - Convert llms.txt to Agent Skills",
+    description: "Transform any llms.txt documentation into installable agent skills for Claude Code, Cursor, Windsurf, and more.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
