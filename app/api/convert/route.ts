@@ -48,7 +48,13 @@ export async function POST(req: NextRequest) {
         } as ConversionResult, { status: 400 });
     }
 
-    const skillName = slugify(parsed.title);
+    // Use custom name if provided and valid, otherwise auto-generate
+    let skillName: string;
+    if (body.customName && /^[a-z][a-z0-9-]*$/.test(body.customName) && body.customName.length <= 64) {
+      skillName = body.customName;
+    } else {
+      skillName = slugify(parsed.title);
+    }
     const currentHash = hashContent(content);
 
     // Check if skill already exists and user didn't request regeneration
@@ -77,7 +83,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { name, content: skillContent } = generateSkill(parsed, sourceUrl);
+    const { name, content: skillContent } = generateSkill(parsed, sourceUrl, skillName !== slugify(parsed.title) ? skillName : undefined);
 
     try {
       const { url, command, isUpdate } = await publishSkill(name, skillContent, sourceUrl, currentHash);

@@ -94,6 +94,7 @@ export default function Home() {
   const [error, setError] = useState<ConversionError | null>(null);
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [customName, setCustomName] = useState("");
 
   const steps = ["Fetching", "Parsing", "Generating", "Publishing"];
 
@@ -115,7 +116,8 @@ export default function Home() {
         body: JSON.stringify({
           type: activeTab,
           [activeTab]: input,
-          forceRegenerate
+          forceRegenerate,
+          ...(customName ? { customName } : {})
         })
       });
 
@@ -177,6 +179,7 @@ export default function Home() {
     setError(null);
     setUrl("");
     setContent("");
+    setCustomName("");
   };
 
   const isValid = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
@@ -294,6 +297,29 @@ export default function Home() {
                   </Button>
                 </TabsPanel>
               </Tabs>
+
+              {/* Optional custom skill name */}
+              <div className="mt-6">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+                  Skill name <span className="normal-case tracking-normal opacity-60">(optional)</span>
+                </label>
+                <Input
+                  type="text"
+                  placeholder="custom-skill-name"
+                  value={customName}
+                  onChange={(e) => {
+                    const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                    setCustomName(sanitized);
+                  }}
+                  maxLength={64}
+                  className="font-mono h-10 max-w-sm bg-card border-border"
+                  autoComplete="off"
+                  spellCheck="false"
+                />
+                <p className="text-xs text-muted-foreground/60 mt-1.5 px-1">
+                  Lowercase letters, numbers, and hyphens only. Leave blank to auto-generate from title.
+                </p>
+              </div>
 
               {/* Browse Skills Link */}
               <div className="mt-12 mb-8">

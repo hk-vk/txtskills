@@ -61,4 +61,5 @@ export interface ConversionRequest {
   content?: string;
   sourceUrl?: string; // Allow sourceUrl to be passed with content
   forceRegenerate?: boolean;
+  customName?: string;
 }

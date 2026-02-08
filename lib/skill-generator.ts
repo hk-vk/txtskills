@@ -1,8 +1,8 @@
 import { ParsedLlmsTxt } from './types';
 import { slugify } from './slugify';
 
-export function generateSkill(parsed: ParsedLlmsTxt, sourceUrl?: string): { name: string; content: string } {
-  const name = slugify(parsed.title);
+export function generateSkill(parsed: ParsedLlmsTxt, sourceUrl?: string, nameOverride?: string): { name: string; content: string } {
+  const name = nameOverride || slugify(parsed.title);
   
   // Generate a meaningful description (required by Agent Skills spec, 1-1024 chars)
   let description = '';
