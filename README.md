@@ -2,7 +2,7 @@
 
 Convert any llms.txt documentation into an installable skill for AI agents.
 
-<div align="right">
+<div align="center">
   <img src="public/mockup.png" alt="txtskills mockup" width="500" />
 </div>
 
