@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@/components/icons/agent-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,66 +163,21 @@ export default function Home() {
     setContent("");
   };
 
-  const handleDemo = () => {
-    setState("loading");
-    setLoadingStep(0);
-
-    const interval = setInterval(() => {
-      setLoadingStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 500);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      setResult({
-        command: "npx skills add hk-vk/skills --skill nuxt-ui",
-        githubUrl: "https://github.com/hk-vk/skills/tree/main/nuxt-ui",
-        skillName: "nuxt-ui",
-        skillContent: `---
-name: nuxt-ui
-description: A comprehensive Vue UI component library (Nuxt optional) with 125+ accessible, production-ready, Tailwind CSS components for building modern web applications.
-metadata:
-  source: llms.txt
-  generated: ${new Date().toISOString()}
----
-
-# Nuxt UI
-
-> A comprehensive Vue UI component library (Nuxt optional) with 125+ accessible, production-ready, Tailwind CSS components for building modern web applications.
-
-## Available Resources
-
-### Installation (Nuxt & Vue)
-
-- **Installation**: Learn how to install and configure Nuxt UI in your Nuxt application.
-  - URL: https://ui.nuxt.com/raw/docs/getting-started/installation/nuxt.md
-
-- **Installation**: Learn how to install and configure Nuxt UI in your Vue application, compatible with both plain Vite and Inertia.
-  - URL: https://ui.nuxt.com/raw/docs/getting-started/installation/vue.md
-
-### Components
-
-- **Accordion**: A stacked set of collapsible panels.
-  - URL: https://ui.nuxt.com/raw/docs/components/accordion.md
-
-- **Alert**: A callout to draw user's attention.
-  - URL: https://ui.nuxt.com/raw/docs/components/alert.md
-
-- **Button**: A button element that can act as a link or trigger an action.
-  - URL: https://ui.nuxt.com/raw/docs/components/button.md
-
-## How to Use This Skill
-
-Reference these resources when working with Nuxt UI.`
-      });
-      setState("success");
-    }, 2500);
-  };
-
   const isValid = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
+      {/* Top nav */}
+      <nav className="max-w-4xl mx-auto px-6 pt-6 flex justify-end">
+        <Link
+          href="/skills"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+        >
+          All skills
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </Link>
+      </nav>
+      <div className="max-w-4xl mx-auto px-6 py-10 md:py-20">
 
         {/* Header */}
         <header className="mb-16 relative">
@@ -305,18 +261,10 @@ Reference these resources when working with Nuxt UI.`
                       Convert
                     </Button>
                   </div>
-                  <div className="flex items-center gap-3 mt-3 px-1">
+                  <div className="mt-3 px-1">
                     <p className="text-xs text-muted-foreground/60">
                       Paste a base URL or a direct llms.txt link.
                     </p>
-                    <span className="text-border/40 select-none">|</span>
-                    <button 
-                      onClick={handleDemo}
-                      className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 group"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 group-hover:bg-primary transition-colors" />
-                      Try a demo
-                    </button>
                   </div>
                 </TabsPanel>
 

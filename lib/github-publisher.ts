@@ -67,6 +67,64 @@ async function skillExists(octokit: Octokit, skillName: string): Promise<boolean
 }
 
 /**
+ * List all skills in the repo.
+ * Reads each skill's .metadata.json for extra info.
+ */
+export async function listAllSkills(): Promise<Array<{
+  name: string;
+  url: string;
+  command: string;
+  metadata: PublishMetadata | null;
+}>> {
+  const octokit = await getOctokit();
+
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: ORG,
+      repo: REPO,
+      path: '',
+    });
+
+    if (!Array.isArray(data)) return [];
+
+    // Filter directories that have SKILL.md (exclude README.md, etc.)
+    const dirs = data.filter((item: any) => item.type === 'dir');
+
+    const skills = await Promise.all(
+      dirs.map(async (dir: any) => {
+        let metadata: PublishMetadata | null = null;
+        try {
+          const { data: metaFile } = await octokit.repos.getContent({
+            owner: ORG,
+            repo: REPO,
+            path: `${dir.name}/.metadata.json`,
+          });
+          if ('content' in metaFile) {
+            metadata = JSON.parse(
+              Buffer.from(metaFile.content, 'base64').toString('utf-8')
+            );
+          }
+        } catch {
+          // No metadata file
+        }
+
+        return {
+          name: dir.name,
+          url: `https://github.com/${ORG}/${REPO}/tree/main/${dir.name}`,
+          command: `npx skills add ${ORG}/${REPO} --skill ${dir.name}`,
+          metadata,
+        };
+      })
+    );
+
+    return skills;
+  } catch (e: any) {
+    if (e.status === 404) return [];
+    throw e;
+  }
+}
+
+/**
  * Fetch an existing skill's content and metadata from the repo.
  * Returns null if the skill doesn't exist.
  */
