@@ -4,7 +4,7 @@ import { Octokit } from '@octokit/rest';
 const APP_ID = process.env.GITHUB_APP_ID;
 const PRIVATE_KEY = process.env.GITHUB_APP_PRIVATE_KEY;
 const INSTALLATION_ID = process.env.GITHUB_INSTALLATION_ID;
-const ORG = process.env.GITHUB_ORG || 'txt2skill-generated';
+const ORG = process.env.GITHUB_ORG || 'hk-vk';
 const REPO = process.env.GITHUB_REPO || 'skills';
 
 let cachedOctokit: Octokit | null = null;

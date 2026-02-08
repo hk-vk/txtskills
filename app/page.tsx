@@ -140,6 +140,61 @@ export default function Home() {
     setContent("");
   };
 
+  const handleDemo = () => {
+    setState("loading");
+    setLoadingStep(0);
+
+    const interval = setInterval(() => {
+      setLoadingStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
+    }, 500);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      setResult({
+        command: "npx skills add hk-vk/skills --skill nuxt-ui",
+        githubUrl: "https://github.com/hk-vk/skills/tree/main/skills/nuxt-ui",
+        skillName: "nuxt-ui",
+        skillContent: `---
+name: nuxt-ui
+description: A comprehensive Vue UI component library (Nuxt optional) with 125+ accessible, production-ready, Tailwind CSS components for building modern web applications.
+metadata:
+  source: llms.txt
+  generated: ${new Date().toISOString()}
+---
+
+# Nuxt UI
+
+> A comprehensive Vue UI component library (Nuxt optional) with 125+ accessible, production-ready, Tailwind CSS components for building modern web applications.
+
+## Available Resources
+
+### Installation (Nuxt & Vue)
+
+- **Installation**: Learn how to install and configure Nuxt UI in your Nuxt application.
+  - URL: https://ui.nuxt.com/raw/docs/getting-started/installation/nuxt.md
+
+- **Installation**: Learn how to install and configure Nuxt UI in your Vue application, compatible with both plain Vite and Inertia.
+  - URL: https://ui.nuxt.com/raw/docs/getting-started/installation/vue.md
+
+### Components
+
+- **Accordion**: A stacked set of collapsible panels.
+  - URL: https://ui.nuxt.com/raw/docs/components/accordion.md
+
+- **Alert**: A callout to draw user's attention.
+  - URL: https://ui.nuxt.com/raw/docs/components/alert.md
+
+- **Button**: A button element that can act as a link or trigger an action.
+  - URL: https://ui.nuxt.com/raw/docs/components/button.md
+
+## How to Use This Skill
+
+Reference these resources when working with Nuxt UI.`
+      });
+      setState("success");
+    }, 2500);
+  };
+
   const isValid = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
 
   return (
@@ -228,9 +283,19 @@ export default function Home() {
                       Convert
                     </Button>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    We&apos;ll fetch /llms.txt from this URL automatically
-                  </p>
+                  <div className="flex items-center gap-3 mt-3 px-1">
+                    <p className="text-xs text-muted-foreground/60">
+                      We&apos;ll fetch /llms.txt from this URL automatically.
+                    </p>
+                    <span className="text-border/40 select-none">|</span>
+                    <button 
+                      onClick={handleDemo}
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 group"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 group-hover:bg-primary transition-colors" />
+                      Try a demo
+                    </button>
+                  </div>
                 </TabsPanel>
 
                 <TabsPanel value="paste">
@@ -318,64 +383,93 @@ export default function Home() {
         {/* Success State */}
         {state === "success" && result && (
           <div className="space-y-12">
-            <section>
-              <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
-                Install Command
-              </h2>
-              <div className="flex items-center gap-3 bg-card border border-border rounded-lg p-4 overflow-hidden">
-                <span className="text-muted-foreground font-mono shrink-0">$</span>
-                <code className="flex-1 font-mono text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">{result.command}</code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopy}
-                  className="shrink-0"
-                >
-                  {copied ? "Copied!" : "Copy"}
-                </Button>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
-                Skill Created
-              </h2>
-              <div className="space-y-4 bg-card/50 border border-border/50 rounded-xl p-6 backdrop-blur-sm">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
-                      <span className="text-lg">✨</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium font-mono">{result.skillName}</h3>
-                      <p className="text-xs text-muted-foreground">Ready to install</p>
+            <section className="border border-border rounded-xl overflow-hidden bg-card/30 backdrop-blur-sm transition-all hover:border-border/80 shadow-sm">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between bg-muted/10">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h3 className="font-mono font-medium text-sm">{result.skillName}</h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      Ready to install
                     </div>
                   </div>
-                  <a
-                    href={result.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-primary hover:underline underline-offset-4 flex items-center gap-1"
-                  >
-                    View on GitHub <LinkIcon className="w-3 h-3" />
-                  </a>
+                </div>
+                <a
+                  href={result.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-muted/50"
+                >
+                  View Source <LinkIcon className="w-3 h-3" />
+                </a>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Install Command</label>
+                  </div>
+                  <div className="relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                    <div className="relative flex items-center gap-3 bg-black/5 dark:bg-black/40 border border-border/50 rounded-lg p-4 font-mono text-sm">
+                      <span className="text-primary/70 select-none">$</span>
+                      <span className="flex-1 overflow-x-auto scrollbar-hide selection:bg-primary/20 text-foreground/90">{result.command}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleCopy}
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-background/20"
+                      >
+                        {copied ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500"><polyline points="20 6 9 17 4 12"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 <Collapsible open={previewOpen} onOpenChange={setPreviewOpen}>
-                  <CollapsibleTrigger className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors border border-border/30 text-sm font-medium mt-2">
-                    <span>SKILL.md Preview</span>
-                    <span className="text-xs text-muted-foreground">{previewOpen ? "Hide" : "Show"}</span>
-                  </CollapsibleTrigger>
-                  <CollapsiblePanel>
-                    <ScrollArea className="h-[300px] mt-2 rounded-lg border border-border bg-muted/10">
-                      <pre className="p-4 text-xs font-mono whitespace-pre-wrap text-muted-foreground">
-                        {result.skillContent}
-                      </pre>
-                    </ScrollArea>
-                  </CollapsiblePanel>
+                  <div className="pt-4 border-t border-border/30">
+                    <CollapsibleTrigger className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground transition-colors group">
+                      <span className="flex items-center gap-2">
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          width="12" 
+                          height="12" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                          className={`transition-transform duration-200 text-muted-foreground/50 group-hover:text-muted-foreground ${previewOpen ? "rotate-90" : ""}`}
+                        >
+                          <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                        Preview generated skill
+                      </span>
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        {previewOpen ? "Close" : "Expand"}
+                      </span>
+                    </CollapsibleTrigger>
+                    <CollapsiblePanel>
+                      <div className="mt-4 rounded-lg border border-border/40 bg-muted/5 p-4 overflow-hidden">
+                        <ScrollArea className="h-[300px] pr-4">
+                          <pre className="text-[11px] font-mono text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                            {result.skillContent}
+                          </pre>
+                        </ScrollArea>
+                      </div>
+                    </CollapsiblePanel>
+                  </div>
                 </Collapsible>
               </div>
             </section>
+
+
 
             <Button variant="outline" onClick={handleReset}>
               Convert Another
