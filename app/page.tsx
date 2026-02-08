@@ -246,6 +246,8 @@ export default function Home() {
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         className="pl-11 font-mono h-12 w-full bg-card border-border"
+                        autoComplete="off"
+                        spellCheck="false"
                       />
                     </div>
                     <Button
