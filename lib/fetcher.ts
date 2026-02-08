@@ -38,7 +38,7 @@ export async function fetchLlmsTxt(urlInput: string): Promise<string> {
         if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html') || trimmed.startsWith('<HTML')) {
           continue;
         }
-        if (text && text.length < 512 * 1024) {
+        if (text && text.length < 2 * 1024 * 1024) {
           clearTimeout(id);
           return text;
         }
