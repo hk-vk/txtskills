@@ -21,7 +21,16 @@ export interface SkillMetadata {
   name: string;
   description: string;
   source: string;
+  sourceUrl?: string;
   generated: string;
+}
+
+export interface PublishMetadata {
+  skillName: string;
+  sourceUrl: string | null;
+  generatedAt: string;
+  updatedAt: string;
+  generatorVersion: string;
 }
 
 export interface ConversionResult {
@@ -30,6 +39,7 @@ export interface ConversionResult {
   githubUrl?: string;
   skillName?: string;
   skillContent?: string;
+  isUpdate?: boolean;
   zipData?: string; 
   error?: ConversionError;
 }

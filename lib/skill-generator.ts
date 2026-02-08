@@ -1,7 +1,7 @@
 import { ParsedLlmsTxt } from './types';
 import { slugify } from './slugify';
 
-export function generateSkill(parsed: ParsedLlmsTxt): { name: string; content: string } {
+export function generateSkill(parsed: ParsedLlmsTxt, sourceUrl?: string): { name: string; content: string } {
   const name = slugify(parsed.title);
   
   const frontmatter = `---
@@ -9,6 +9,7 @@ name: ${name}
 description: ${parsed.summary || parsed.description.substring(0, 150).replace(/\n/g, ' ')}
 metadata:
   source: llms.txt
+  source_url: ${sourceUrl || 'unknown'}
   generated: ${new Date().toISOString()}
 ---`;
 

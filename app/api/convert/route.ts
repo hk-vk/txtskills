@@ -12,8 +12,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json() as ConversionRequest;
     
     let content = '';
+    let sourceUrl: string | undefined;
     
     if (body.type === 'url' && body.url) {
+      sourceUrl = body.url;
       try {
         content = await fetchLlmsTxt(body.url);
       } catch (e) {
@@ -39,17 +41,18 @@ export async function POST(req: NextRequest) {
         } as ConversionResult, { status: 400 });
     }
 
-    const { name, content: skillContent } = generateSkill(parsed);
+    const { name, content: skillContent } = generateSkill(parsed, sourceUrl);
 
     try {
-      const { url, command } = await publishSkill(name, skillContent);
+      const { url, command, isUpdate } = await publishSkill(name, skillContent, sourceUrl);
       
       return NextResponse.json({
         success: true,
         command,
         githubUrl: url,
         skillName: name,
-        skillContent
+        skillContent,
+        isUpdate
       } as ConversionResult);
     } catch (e) {
       return NextResponse.json({

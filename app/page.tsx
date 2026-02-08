@@ -62,6 +62,7 @@ interface ConversionResult {
   githubUrl: string;
   skillName: string;
   skillContent: string;
+  isUpdate?: boolean;
 }
 
 interface ConversionError {
@@ -390,7 +391,17 @@ Reference these resources when working with Nuxt UI.`
                   <div>
                     <h3 className="font-mono font-medium text-sm">{result.skillName}</h3>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      Ready to install
+                      {result.isUpdate ? (
+                        <span className="flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-amber-500" />
+                          Updated in-place
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-emerald-500" />
+                          Ready to install
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
