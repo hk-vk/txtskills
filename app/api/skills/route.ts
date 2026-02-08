@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { listAllSkills } from '@/lib/github-publisher';
+import { listSkillsFromDB } from '@/lib/db';
 
 // Server-side cache for skills list
 let skillsCache: { data: any; timestamp: number } | null = null;
@@ -16,7 +17,42 @@ export async function GET() {
       });
     }
 
-    const skills = await listAllSkills();
+    // Try D1 first (fast), fallback to GitHub API
+    let skills: Array<{
+      name: string;
+      url: string;
+      command: string;
+      metadata: {
+        sourceUrl: string | null;
+        generatedAt: string;
+        updatedAt: string;
+      } | null;
+    }> = [];
+
+    try {
+      // Try D1 database first (much faster)
+      const dbSkills = await listSkillsFromDB();
+      if (dbSkills.length > 0) {
+        skills = dbSkills.map((s) => ({
+          name: s.name,
+          url: s.github_url,
+          command: s.install_command,
+          metadata: {
+            sourceUrl: s.source_url,
+            generatedAt: s.created_at,
+            updatedAt: s.updated_at,
+          },
+        }));
+      } else {
+        // D1 empty, fall back to GitHub API
+        skills = await listAllSkills();
+      }
+    } catch (dbError) {
+      // D1 failed, fall back to GitHub API
+      console.warn('D1 query failed, falling back to GitHub:', dbError);
+      skills = await listAllSkills();
+    }
+
     const responseData = { skills };
     
     // Update cache
