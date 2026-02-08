@@ -1,6 +1,8 @@
-interface CloudflareEnv {
-  DB: D1Database;
-  NEXT_PUBLIC_BASE_URL: string;
-  WORKER_SELF_REFERENCE: Fetcher;
-  ASSETS: Fetcher;
+// Extend the CloudflareEnv interface to include our D1 database
+declare global {
+  interface CloudflareEnv {
+    DB: D1Database;
+  }
 }
+
+export {};
