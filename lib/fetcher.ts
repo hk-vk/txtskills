@@ -29,8 +29,16 @@ export async function fetchLlmsTxt(urlInput: string): Promise<string> {
     try {
       const response = await fetch(url, { signal: controller.signal });
       if (response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html') || contentType.includes('application/xhtml')) {
+          continue;
+        }
         const text = await response.text();
-        if (text && text.length < 1024 * 1024) { 
+        const trimmed = text.trimStart();
+        if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html') || trimmed.startsWith('<HTML')) {
+          continue;
+        }
+        if (text && text.length < 512 * 1024) {
           clearTimeout(id);
           return text;
         }

@@ -344,14 +344,6 @@ export async function publishSkill(
       console.error('D1 upsert failed (non-fatal):', dbError?.message);
     }
 
-    // Update skills.json manifest after publishing
-    try {
-      await updateSkillsManifest();
-    } catch (manifestError: any) {
-      // Log but don't fail the publish
-      console.error('Manifest update failed (non-fatal):', manifestError?.message);
-    }
-
     return {
       url: githubUrl,
       command: installCommand,

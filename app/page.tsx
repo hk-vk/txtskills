@@ -119,6 +119,15 @@ export default function Home() {
         })
       });
 
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(
+          response.status >= 500
+            ? 'Server error — the input may be too large to process. Try a smaller llms.txt.'
+            : 'Unexpected response from server. Please try again.'
+        );
+      }
+
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -126,9 +135,11 @@ export default function Home() {
       }
 
       setResult(data);
-      // Invalidate skills cache so /skills page refetches after new publish
+      // Invalidate skills cache and update manifest after a new publish
       if (!data.publishFailed && !data.alreadyExists) {
         invalidateSkillsCache();
+        // Update skills.json manifest in a separate request (fire-and-forget)
+        fetch('/api/skills/manifest', { method: 'POST' }).catch(() => {});
       }
       // Auto-expand preview when publish failed (no install command available)
       if (data.publishFailed) {
