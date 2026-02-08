@@ -55,6 +55,9 @@ export function invalidateSkillsCache() {
   try {
     localStorage.removeItem(CACHE_KEY);
   } catch {}
+  
+  // Also invalidate server-side cache
+  fetch('/api/skills', { method: 'POST' }).catch(() => {});
 }
 
 /** Smart skills fetcher — returns cached data instantly and only refetches when stale */

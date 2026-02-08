@@ -1,4 +1,14 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# txtskills
+
+Convert any llms.txt documentation into an installable skill for AI agents.
+
+<div align="center">
+  <img src="public/mockup.png" alt="txtskills mockup" width="500" />
+</div>
+
+All skills live at [github.com/hk-vk/skills](https://github.com/hk-vk/skills)
+
+---
 
 ## Getting Started
 

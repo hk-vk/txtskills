@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
 import { useSkillsCache } from "@/hooks/use-skills-cache";
 
 export default function SkillsPage() {
   const { skills, loading } = useSkillsCache();
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter skills based on search query
+  const filteredSkills = useMemo(() => {
+    if (!searchQuery.trim()) return skills;
+    const query = searchQuery.toLowerCase().trim();
+    return skills.filter(
+      (skill) =>
+        skill.name.toLowerCase().includes(query) ||
+        skill.metadata?.sourceUrl?.toLowerCase().includes(query)
+    );
+  }, [skills, searchQuery]);
 
   const handleCopy = async (command: string, name: string) => {
     await navigator.clipboard.writeText(command);
@@ -37,6 +50,36 @@ export default function SkillsPage() {
           </Link>
         </div>
 
+        {/* Search Bar */}
+        {!loading && skills.length > 0 && (
+          <div className="mb-6 relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+            </div>
+            <Input
+              type="search"
+              placeholder="Search skills..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6 6 18"/>
+                  <path d="m6 6 12 12"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center gap-3 py-20 justify-center text-muted-foreground">
             <Spinner className="size-4" />
@@ -52,9 +95,21 @@ export default function SkillsPage() {
               Create your first skill
             </Link>
           </div>
+        ) : filteredSkills.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="text-muted-foreground text-sm">
+              No skills found matching "{searchQuery}"
+            </p>
+            <button
+              onClick={() => setSearchQuery("")}
+              className="text-sm text-primary hover:underline mt-3 inline-block"
+            >
+              Clear search
+            </button>
+          </div>
         ) : (
           <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
-            {skills.map((skill) => (
+            {filteredSkills.map((skill) => (
               <div key={skill.name}>
                 <div className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                   <div className="min-w-0 flex-1">

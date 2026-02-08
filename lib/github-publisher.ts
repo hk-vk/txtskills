@@ -67,8 +67,11 @@ async function skillExists(octokit: Octokit, skillName: string): Promise<boolean
 }
 
 /**
- * List all skills in the repo.
- * Reads each skill's .metadata.json for extra info.
+ * List all skills in the repo using Git Trees API (single API call).
+ * This is MUCH faster than the old N+1 approach.
+ * 
+ * Performance: 1 API call for tree + N parallel blob fetches (batched)
+ * vs old: 1 + N sequential API calls
  */
 export async function listAllSkills(): Promise<Array<{
   name: string;
@@ -79,43 +82,84 @@ export async function listAllSkills(): Promise<Array<{
   const octokit = await getOctokit();
 
   try {
-    const { data } = await octokit.repos.getContent({
+    // Get the main branch reference
+    const { data: refData } = await octokit.git.getRef({
       owner: ORG,
       repo: REPO,
-      path: '',
+      ref: 'heads/main',
+    });
+    
+    // Fetch the ENTIRE repo tree recursively in ONE API call
+    const { data: treeData } = await octokit.git.getTree({
+      owner: ORG,
+      repo: REPO,
+      tree_sha: refData.object.sha,
+      recursive: 'true',
     });
 
-    if (!Array.isArray(data)) return [];
+    // Parse tree to find skills and their metadata blob SHAs
+    const skillDirs = new Set<string>();
+    const metadataBlobShas = new Map<string, string>(); // skillName -> blob sha
 
-    // Filter directories that have SKILL.md (exclude README.md, etc.)
-    const dirs = data.filter((item: any) => item.type === 'dir');
+    for (const item of treeData.tree) {
+      if (!item.path) continue;
+      
+      // Identify skill directories by SKILL.md presence
+      const skillMdMatch = item.path.match(/^([^/]+)\/SKILL\.md$/);
+      if (skillMdMatch) {
+        skillDirs.add(skillMdMatch[1]);
+      }
+      
+      // Track metadata blob SHAs for later fetching
+      const metaMatch = item.path.match(/^([^/]+)\/\.metadata\.json$/);
+      if (metaMatch && item.sha) {
+        metadataBlobShas.set(metaMatch[1], item.sha);
+      }
+    }
 
-    const skills = await Promise.all(
-      dirs.map(async (dir: any) => {
-        let metadata: PublishMetadata | null = null;
-        try {
-          const { data: metaFile } = await octokit.repos.getContent({
-            owner: ORG,
-            repo: REPO,
-            path: `${dir.name}/.metadata.json`,
-          });
-          if ('content' in metaFile) {
-            metadata = JSON.parse(
-              Buffer.from(metaFile.content, 'base64').toString('utf-8')
-            );
+    if (skillDirs.size === 0) return [];
+
+    // Fetch metadata blobs in parallel (much faster than sequential)
+    // Limit concurrency to avoid rate limiting
+    const BATCH_SIZE = 10;
+    const skillNames = Array.from(skillDirs);
+    const metadataMap = new Map<string, PublishMetadata | null>();
+
+    for (let i = 0; i < skillNames.length; i += BATCH_SIZE) {
+      const batch = skillNames.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(async (skillName) => {
+          const blobSha = metadataBlobShas.get(skillName);
+          if (!blobSha) return { skillName, metadata: null };
+          
+          try {
+            const { data } = await octokit.git.getBlob({
+              owner: ORG,
+              repo: REPO,
+              file_sha: blobSha,
+            });
+            const content = Buffer.from(data.content, 'base64').toString('utf-8');
+            return { skillName, metadata: JSON.parse(content) as PublishMetadata };
+          } catch {
+            return { skillName, metadata: null };
           }
-        } catch {
-          // No metadata file
-        }
+        })
+      );
+      
+      for (const { skillName, metadata } of batchResults) {
+        metadataMap.set(skillName, metadata);
+      }
+    }
 
-        return {
-          name: dir.name,
-          url: `https://github.com/${ORG}/${REPO}/tree/main/${dir.name}`,
-          command: `npx skills add ${ORG}/${REPO} --skill ${dir.name}`,
-          metadata,
-        };
-      })
-    );
+    // Build and sort skills array
+    const skills = skillNames
+      .map(name => ({
+        name,
+        url: `https://github.com/${ORG}/${REPO}/tree/main/${name}`,
+        command: `npx skills add ${ORG}/${REPO} --skill ${name}`,
+        metadata: metadataMap.get(name) || null,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     return skills;
   } catch (e: any) {
