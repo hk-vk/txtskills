@@ -90,49 +90,37 @@ export default function Home() {
     setState("loading");
     setLoadingStep(0);
 
+    const interval = setInterval(() => {
+      setLoadingStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
+    }, 2000);
+
     try {
-      for (let i = 0; i < 4; i++) {
-        setLoadingStep(i);
-        await new Promise((r) => setTimeout(r, 800));
+      const response = await fetch('/api/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: activeTab,
+          [activeTab]: input
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error?.message || 'Conversion failed');
       }
 
-      const mockSkillName = activeTab === "url"
-        ? new URL(url).hostname.replace(/\./g, "-").replace("www-", "")
-        : "custom-skill";
-
-      setResult({
-        command: `npx skills add llmskills/skills --skill ${mockSkillName}`,
-        githubUrl: `https://github.com/llmskills/skills/tree/main/skills/${mockSkillName}`,
-        skillName: mockSkillName,
-        skillContent: `---
-name: ${mockSkillName}
-description: Documentation converted from llms.txt.
-metadata:
-  source: llms.txt
-  generated: ${new Date().toISOString()}
----
-
-# ${mockSkillName}
-
-> Generated skill from llms.txt
-
-## Available Resources
-
-This skill was automatically generated.
-
-## How to Use
-
-Reference these resources when working with ${mockSkillName}.
-`,
-      });
+      setResult(data);
       setState("success");
-    } catch {
+    } catch (err: any) {
       setError({
-        type: "unknown",
-        message: "Conversion failed. Please try again.",
+        type: "api",
+        message: err.message || "Something went wrong. Please try again.",
         suggestion: "Check your input and try again.",
       });
       setState("error");
+    } finally {
+      clearInterval(interval);
     }
   };
 
@@ -160,12 +148,13 @@ Reference these resources when working with ${mockSkillName}.
 
         {/* Header */}
         <header className="mb-16 relative">
-          {/* Decorative grid background */}
-          <div className="absolute inset-0 -z-10 overflow-hidden opacity-[0.03]">
-            <div className="absolute inset-0" style={{
+          {/* Decorative background */}
+          <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 opacity-[0.03]" style={{
               backgroundImage: 'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
               backgroundSize: '24px 24px'
             }} />
+            <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
           </div>
           
           {/* Main title section */}
@@ -195,14 +184,14 @@ Reference these resources when working with ${mockSkillName}.
               llms.txt → agent skills
             </p>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-4 leading-relaxed mx-auto md:mx-0">
-              Convert any <code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono">llms.txt</code> documentation into an installable skill for AI agents.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-6 leading-relaxed mx-auto md:mx-0">
+              Convert any <a href="https://llmstxt.org/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity"><code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono border border-border/50">llms.txt</code></a> documentation into an installable <a href="https://agentskills.io/home" target="_blank" rel="noopener noreferrer" className="text-foreground border-b border-border hover:border-foreground transition-colors pb-0.5">skill</a> for AI agents.
             </p>
           </div>
 
           {/* Decorative corner elements */}
-          <div className="absolute top-0 right-0 w-16 h-16 border-t border-r border-border/30 rounded-tr-lg pointer-events-none hidden md:block" />
-          <div className="absolute bottom-0 left-0 w-16 h-16 border-b border-l border-border/30 rounded-bl-lg pointer-events-none hidden md:block" />
+          <div className="absolute top-0 right-0 w-16 h-16 border-t border-r border-border/30 rounded-tr-lg pointer-events-none hidden md:block opacity-50" />
+          <div className="absolute bottom-0 left-0 w-16 h-16 border-b border-l border-border/30 rounded-bl-lg pointer-events-none hidden md:block opacity-50" />
         </header>
 
         {/* Input State */}
@@ -234,7 +223,7 @@ Reference these resources when working with ${mockSkillName}.
                     <Button
                       onClick={handleSubmit}
                       disabled={!isValid}
-                      className="h-12 px-8"
+                      className="h-12 px-8 shadow-lg hover:shadow-primary/25 transition-all"
                     >
                       Convert
                     </Button>
@@ -254,7 +243,7 @@ Reference these resources when working with ${mockSkillName}.
                   <Button
                     onClick={handleSubmit}
                     disabled={!isValid}
-                    className="h-12 px-6"
+                    className="h-12 px-6 shadow-lg hover:shadow-primary/25 transition-all"
                   >
                     Convert
                   </Button>
@@ -262,42 +251,42 @@ Reference these resources when working with ${mockSkillName}.
               </Tabs>
 
               {/* Works With - Agent Compatibility */}
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <span className="text-xs text-muted-foreground uppercase tracking-wider mr-1">Works with</span>
-                <div className="flex flex-wrap items-center gap-2">
+              <div className="mt-12 space-y-4">
+                <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold opacity-70">Compatible with</span>
+                <div className="flex flex-wrap items-center gap-3">
                   {/* Claude Code */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                    <ClaudeIcon className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
+                    <ClaudeIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Claude Code</span>
                   </div>
                   {/* Cursor */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                    <CursorIcon className="w-3.5 h-3.5 text-foreground" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
+                    <CursorIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Cursor</span>
                   </div>
                   {/* Windsurf */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                    <WindsurfIcon className="w-3.5 h-3.5 text-teal-400" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
+                    <WindsurfIcon className="w-4 h-4 text-teal-400 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Windsurf</span>
                   </div>
                   {/* GitHub Copilot */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                    <CopilotIcon className="w-3.5 h-3.5 text-foreground" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
+                    <CopilotIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Copilot</span>
                   </div>
                   {/* Amp */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                    <AmpIcon className="w-3.5 h-3.5 text-foreground" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
+                    <AmpIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Amp</span>
                   </div>
                   {/* Antigravity */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-md border border-border/50 hover:border-border transition-colors">
-                    <AntigravityIcon className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
+                    <AntigravityIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Antigravity</span>
                   </div>
                   {/* More */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground">
-                    <span className="text-xs">+ more</span>
+                  <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 border border-transparent select-none">
+                    <span className="text-xs font-medium">+ more</span>
                   </div>
                 </div>
               </div>
@@ -351,26 +340,35 @@ Reference these resources when working with ${mockSkillName}.
               <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
                 Skill Created
               </h2>
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-mono break-all">{result.skillName}</span>
+              <div className="space-y-4 bg-card/50 border border-border/50 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <span className="text-lg">✨</span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium font-mono">{result.skillName}</h3>
+                      <p className="text-xs text-muted-foreground">Ready to install</p>
+                    </div>
+                  </div>
                   <a
                     href={result.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm font-medium text-primary hover:underline underline-offset-4 flex items-center gap-1"
                   >
-                    View on GitHub →
+                    View on GitHub <LinkIcon className="w-3 h-3" />
                   </a>
                 </div>
 
                 <Collapsible open={previewOpen} onOpenChange={setPreviewOpen}>
-                  <CollapsibleTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-                    {previewOpen ? "Hide" : "Show"} SKILL.md Preview
+                  <CollapsibleTrigger className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors border border-border/30 text-sm font-medium mt-2">
+                    <span>SKILL.md Preview</span>
+                    <span className="text-xs text-muted-foreground">{previewOpen ? "Hide" : "Show"}</span>
                   </CollapsibleTrigger>
                   <CollapsiblePanel>
-                    <ScrollArea className="h-[300px] mt-4 rounded-lg border border-border">
-                      <pre className="p-4 text-sm font-mono whitespace-pre-wrap">
+                    <ScrollArea className="h-[300px] mt-2 rounded-lg border border-border bg-muted/10">
+                      <pre className="p-4 text-xs font-mono whitespace-pre-wrap text-muted-foreground">
                         {result.skillContent}
                       </pre>
                     </ScrollArea>
