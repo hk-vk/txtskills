@@ -1,0 +1,22 @@
+name = "txtskills"
+main = ".open-next/worker.js"
+compatibility_date = "2024-01-01"
+
+# Custom domain configuration
+routes = [
+  { pattern = "txtskills.hari.works", custom_domain = true }
+]
+
+# Environment variables
+[vars]
+NEXT_PUBLIC_BASE_URL = "https://txtskills.hari.works"
+
+# Asset binding
+[[assets]]
+binding = "ASSETS"
+directory = ".open-next/assets"
+
+# Worker self-reference binding
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "txtskills"

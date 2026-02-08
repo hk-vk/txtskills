@@ -35,8 +35,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/dompurify": "^3.0.5",
-    "@types/jszip": "^3.4.0",
     "@types/marked": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^19",
