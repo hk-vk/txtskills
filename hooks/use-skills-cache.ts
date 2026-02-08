@@ -16,13 +16,16 @@ interface SkillListItem {
 interface CacheEntry {
   skills: SkillListItem[];
   timestamp: number;
+  version: string | number;
 }
 
 const CACHE_KEY = "txtskills:skills-cache";
+const CACHE_VERSION_KEY = "txtskills:cache-version";
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-// In-memory cache shared across hook instances (survives re-renders, not page reloads)
+// In-memory cache shared across hook instances
 let memoryCache: CacheEntry | null = null;
+let lastKnownVersion: string | number | null = null;
 
 function readLocalCache(): CacheEntry | null {
   try {
@@ -31,6 +34,7 @@ function readLocalCache(): CacheEntry | null {
     const entry: CacheEntry = JSON.parse(raw);
     if (Date.now() - entry.timestamp > CACHE_TTL) {
       localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_VERSION_KEY);
       return null;
     }
     return entry;
@@ -39,28 +43,32 @@ function readLocalCache(): CacheEntry | null {
   }
 }
 
-function writeCache(skills: SkillListItem[]) {
-  const entry: CacheEntry = { skills, timestamp: Date.now() };
+function writeCache(skills: SkillListItem[], version: string | number) {
+  const entry: CacheEntry = { skills, timestamp: Date.now(), version };
   memoryCache = entry;
+  lastKnownVersion = version;
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+    localStorage.setItem(CACHE_VERSION_KEY, String(version));
   } catch {
-    // localStorage full or unavailable — memory cache still works
+    // localStorage full or unavailable
   }
 }
 
 /** Invalidate the skills cache (call after publishing a new skill) */
 export function invalidateSkillsCache() {
   memoryCache = null;
+  lastKnownVersion = null;
   try {
     localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_VERSION_KEY);
   } catch {}
   
-  // Also invalidate server-side cache
+  // Invalidate server-side cache
   fetch('/api/skills', { method: 'POST' }).catch(() => {});
 }
 
-/** Smart skills fetcher — returns cached data instantly and only refetches when stale */
+/** Smart skills fetcher — returns cached data and checks for updates */
 export function useSkillsCache() {
   const [skills, setSkills] = useState<SkillListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,6 +87,7 @@ export function useSkillsCache() {
       const local = readLocalCache();
       if (local) {
         memoryCache = local;
+        lastKnownVersion = local.version;
         setSkills(local.skills);
         setLoading(false);
         return;
@@ -91,9 +100,12 @@ export function useSkillsCache() {
       const res = await fetch("/api/skills");
       const data = await res.json();
       const fetched: SkillListItem[] = data.skills || [];
-      writeCache(fetched);
+      const version = data._v || Date.now();
+      
+      writeCache(fetched, version);
       setSkills(fetched);
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch skills:', err);
       setSkills([]);
     } finally {
       setLoading(false);
