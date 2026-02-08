@@ -6,11 +6,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { useSkillsCache } from "@/hooks/use-skills-cache";
 
+const SKILLS_PER_PAGE = 10;
+
 export default function SkillsPage() {
   const { skills, loading } = useSkillsCache();
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter skills based on search query
   const filteredSkills = useMemo(() => {
@@ -22,6 +25,18 @@ export default function SkillsPage() {
         skill.metadata?.sourceUrl?.toLowerCase().includes(query)
     );
   }, [skills, searchQuery]);
+
+  // Paginate filtered skills
+  const totalPages = Math.ceil(filteredSkills.length / SKILLS_PER_PAGE);
+  const paginatedSkills = useMemo(() => {
+    const startIndex = (currentPage - 1) * SKILLS_PER_PAGE;
+    return filteredSkills.slice(startIndex, startIndex + SKILLS_PER_PAGE);
+  }, [filteredSkills, currentPage]);
+
+  // Reset to page 1 when search changes
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleCopy = async (command: string, name: string) => {
     await navigator.clipboard.writeText(command);
@@ -38,6 +53,8 @@ export default function SkillsPage() {
             <p className="text-sm text-muted-foreground mt-1">
               {loading
                 ? "Loading..."
+                : searchQuery
+                ? `${filteredSkills.length} skill${filteredSkills.length !== 1 ? "s" : ""} found`
                 : `${skills.length} skill${skills.length !== 1 ? "s" : ""} published`}
             </p>
           </div>
@@ -109,7 +126,7 @@ export default function SkillsPage() {
           </div>
         ) : (
           <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
-            {filteredSkills.map((skill) => (
+            {paginatedSkills.map((skill) => (
               <div key={skill.name}>
                 <div className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                   <div className="min-w-0 flex-1">
@@ -182,6 +199,38 @@ export default function SkillsPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && filteredSkills.length > SKILLS_PER_PAGE && (
+          <div className="flex items-center justify-between mt-6 text-sm">
+            <p className="text-muted-foreground">
+              Showing {((currentPage - 1) * SKILLS_PER_PAGE) + 1} to {Math.min(currentPage * SKILLS_PER_PAGE, filteredSkills.length)} of {filteredSkills.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m15 18-6-6 6-6"/>
+                </svg>
+              </button>
+              <span className="text-muted-foreground min-w-[60px] text-center">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+              </button>
+            </div>
           </div>
         )}
       </div>
