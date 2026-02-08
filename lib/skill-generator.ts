@@ -4,9 +4,29 @@ import { slugify } from './slugify';
 export function generateSkill(parsed: ParsedLlmsTxt, sourceUrl?: string): { name: string; content: string } {
   const name = slugify(parsed.title);
   
+  // Generate a meaningful description (required by Agent Skills spec, 1-1024 chars)
+  let description = '';
+  if (parsed.summary) {
+    description = parsed.summary;
+  } else if (parsed.description) {
+    // Take first 200 chars of description
+    description = parsed.description.substring(0, 200).replace(/\n/g, ' ').trim();
+  } else {
+    // Fallback description based on title
+    description = `${parsed.title} documentation and resources. Use this skill when working with ${parsed.title} or when the user mentions ${parsed.title.toLowerCase()}.`;
+  }
+  
+  // Ensure description is not empty and not too long
+  if (!description || description.length === 0) {
+    description = `${parsed.title} documentation and best practices.`;
+  }
+  if (description.length > 1024) {
+    description = description.substring(0, 1020) + '...';
+  }
+  
   const frontmatter = `---
 name: ${name}
-description: ${parsed.summary || parsed.description.substring(0, 150).replace(/\n/g, ' ')}
+description: ${description}
 metadata:
   source: llms.txt
   source_url: ${sourceUrl || 'unknown'}
