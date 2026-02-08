@@ -25,7 +25,8 @@ export interface SkillInput {
  * Get the D1 database binding
  */
 async function getDB() {
-  const { env } = await getCloudflareContext();
+  const { env } = await getCloudflareContext({ async: true });
+  console.log('Available env bindings:', Object.keys(env || {}));
   if (!env.DB) {
     throw new Error("D1 database not configured");
   }
