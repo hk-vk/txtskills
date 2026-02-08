@@ -6,7 +6,7 @@ Convert any llms.txt documentation into an installable skill for AI agents.
   <img src="public/mockup.png" alt="txtskills mockup" width="500" />
 </div>
 
-All skills live at [github.com/hk-vk/skills](https://github.com/hk-vk/skills)
+Generated skills are saved to [hk-vk/skills](https://github.com/hk-vk/skills)
 
 ---
 
