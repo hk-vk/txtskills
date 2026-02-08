@@ -12,10 +12,15 @@ export async function fetchLlmsTxt(urlInput: string): Promise<string> {
     targetUrl = targetUrl.slice(0, -1);
   }
 
+  const baseUrl = targetUrl.endsWith('llms.txt')
+    ? targetUrl.replace(/\/?\.?well-known\/llms\.txt$|\/llms\.txt$/, '')
+    : targetUrl;
+
   const variations = [
-    targetUrl.endsWith('llms.txt') ? targetUrl : `${targetUrl}/llms.txt`,
-    `${targetUrl}/llms.txt`, 
-    targetUrl 
+    targetUrl.endsWith('llms.txt') ? targetUrl : `${baseUrl}/llms.txt`,
+    `${baseUrl}/llms.txt`,
+    `${baseUrl}/.well-known/llms.txt`,
+    targetUrl
   ];
 
   const uniqueVariations = [...new Set(variations)];

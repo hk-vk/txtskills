@@ -28,6 +28,7 @@ export interface SkillMetadata {
 export interface PublishMetadata {
   skillName: string;
   sourceUrl: string | null;
+  contentHash: string;
   generatedAt: string;
   updatedAt: string;
   generatorVersion: string;
@@ -40,6 +41,10 @@ export interface ConversionResult {
   skillName?: string;
   skillContent?: string;
   isUpdate?: boolean;
+  alreadyExists?: boolean;
+  contentChanged?: boolean;
+  existingMetadata?: PublishMetadata | null;
+  publishFailed?: boolean;
   zipData?: string; 
   error?: ConversionError;
 }
@@ -54,4 +59,5 @@ export interface ConversionRequest {
   type: 'url' | 'content';
   url?: string;
   content?: string;
+  forceRegenerate?: boolean;
 }

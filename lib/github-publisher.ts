@@ -26,13 +26,24 @@ async function getOctokit() {
     privateKey: PRIVATE_KEY.replace(/\\n/g, '\n'),
   });
 
-  const installationOctokit = await app.getInstallationOctokit(
-    parseInt(INSTALLATION_ID)
-  );
+  // Get installation access token via the App's JWT-authenticated Octokit
+  let data: any;
+  try {
+    const response = await app.octokit.request(
+      'POST /app/installations/{installation_id}/access_tokens',
+      { installation_id: parseInt(INSTALLATION_ID) }
+    );
+    data = response.data;
+  } catch (e: any) {
+    console.error('GitHub App auth failed:', e?.response?.data?.message || e?.message);
+    throw new Error('GitHub App authentication failed.');
+  }
+
+  // Create a full @octokit/rest instance with the token (has .repos, .git, etc.)
+  cachedOctokit = new Octokit({ auth: data.token });
 
   // Cache for 50 minutes (installation tokens last 1 hour)
   tokenExpiry = Date.now() + 50 * 60 * 1000;
-  cachedOctokit = installationOctokit as unknown as Octokit;
   
   return cachedOctokit;
 }
@@ -46,11 +57,63 @@ async function skillExists(octokit: Octokit, skillName: string): Promise<boolean
     await octokit.repos.getContent({
       owner: ORG,
       repo: REPO,
-      path: `skills/${skillName}/SKILL.md`,
+      path: `${skillName}/SKILL.md`,
     });
     return true;
   } catch (e: any) {
     if (e.status === 404) return false;
+    throw e;
+  }
+}
+
+/**
+ * Fetch an existing skill's content and metadata from the repo.
+ * Returns null if the skill doesn't exist.
+ */
+export async function getExistingSkill(skillName: string): Promise<{
+  skillContent: string;
+  metadata: PublishMetadata | null;
+  url: string;
+  command: string;
+} | null> {
+  const octokit = await getOctokit();
+
+  try {
+    // Fetch SKILL.md content
+    const { data: skillFile } = await octokit.repos.getContent({
+      owner: ORG,
+      repo: REPO,
+      path: `${skillName}/SKILL.md`,
+    });
+
+    if (!('content' in skillFile)) return null;
+
+    const skillContent = Buffer.from(skillFile.content, 'base64').toString('utf-8');
+
+    // Try to fetch .metadata.json (optional)
+    let metadata: PublishMetadata | null = null;
+    try {
+      const { data: metaFile } = await octokit.repos.getContent({
+        owner: ORG,
+        repo: REPO,
+        path: `${skillName}/.metadata.json`,
+      });
+      if ('content' in metaFile) {
+        const metaContent = Buffer.from(metaFile.content, 'base64').toString('utf-8');
+        metadata = JSON.parse(metaContent);
+      }
+    } catch {
+      // .metadata.json may not exist for older skills
+    }
+
+    return {
+      skillContent,
+      metadata,
+      url: `https://github.com/${ORG}/${REPO}/tree/main/${skillName}`,
+      command: `npx skills add ${ORG}/${REPO} --skill ${skillName}`,
+    };
+  } catch (e: any) {
+    if (e.status === 404) return null;
     throw e;
   }
 }
@@ -63,7 +126,8 @@ async function skillExists(octokit: Octokit, skillName: string): Promise<boolean
 export async function publishSkill(
   skillName: string,
   content: string,
-  sourceUrl?: string
+  sourceUrl?: string,
+  contentHash?: string
 ): Promise<{ url: string; command: string; isUpdate: boolean }> {
   const octokit = await getOctokit();
   
@@ -74,13 +138,14 @@ export async function publishSkill(
   const metadata: PublishMetadata = {
     skillName,
     sourceUrl: sourceUrl || null,
+    contentHash: contentHash || '',
     generatedAt: now,
     updatedAt: now,
     generatorVersion: GENERATOR_VERSION,
   };
 
-  const skillPath = `skills/${skillName}/SKILL.md`;
-  const metadataPath = `skills/${skillName}/.metadata.json`;
+  const skillPath = `${skillName}/SKILL.md`;
+  const metadataPath = `${skillName}/.metadata.json`;
   const metadataContent = JSON.stringify(metadata, null, 2);
 
   try {
@@ -159,12 +224,12 @@ export async function publishSkill(
     });
 
     return {
-      url: `https://github.com/${ORG}/${REPO}/tree/main/skills/${skillName}`,
+      url: `https://github.com/${ORG}/${REPO}/tree/main/${skillName}`,
       command: `npx skills add ${ORG}/${REPO} --skill ${skillName}`,
       isUpdate,
     };
-  } catch (error) {
-    console.error('GitHub Publish Error:', error);
+  } catch (error: any) {
+    console.error('GitHub Publish Error:', error?.response?.data?.message || error?.message);
     throw new Error('Failed to publish to GitHub.');
   }
 }

@@ -58,11 +58,22 @@ function GlobeIcon({ className }: { className?: string }) {
 type AppState = "input" | "loading" | "success" | "error";
 
 interface ConversionResult {
-  command: string;
-  githubUrl: string;
+  command?: string;
+  githubUrl?: string;
   skillName: string;
   skillContent: string;
   isUpdate?: boolean;
+  alreadyExists?: boolean;
+  contentChanged?: boolean;
+  publishFailed?: boolean;
+  existingMetadata?: {
+    skillName: string;
+    sourceUrl: string | null;
+    contentHash: string;
+    generatedAt: string;
+    updatedAt: string;
+    generatorVersion: string;
+  } | null;
 }
 
 interface ConversionError {
@@ -84,7 +95,7 @@ export default function Home() {
 
   const steps = ["Fetching", "Parsing", "Generating", "Publishing"];
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (forceRegenerate = false) => {
     const input = activeTab === "url" ? url.trim() : content.trim();
     if (!input) return;
 
@@ -101,7 +112,8 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: activeTab,
-          [activeTab]: input
+          [activeTab]: input,
+          forceRegenerate
         })
       });
 
@@ -112,6 +124,10 @@ export default function Home() {
       }
 
       setResult(data);
+      // Auto-expand preview when publish failed (no install command available)
+      if (data.publishFailed) {
+        setPreviewOpen(true);
+      }
       setState("success");
     } catch (err: any) {
       setError({
@@ -125,9 +141,14 @@ export default function Home() {
     }
   };
 
+  const handleRegenerate = () => {
+    handleSubmit(true);
+  };
+
   const handleCopy = async () => {
     if (result) {
-      await navigator.clipboard.writeText(result.command);
+      const textToCopy = result.command || result.skillContent || '';
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -153,7 +174,7 @@ export default function Home() {
       clearInterval(interval);
       setResult({
         command: "npx skills add hk-vk/skills --skill nuxt-ui",
-        githubUrl: "https://github.com/hk-vk/skills/tree/main/skills/nuxt-ui",
+        githubUrl: "https://github.com/hk-vk/skills/tree/main/nuxt-ui",
         skillName: "nuxt-ui",
         skillContent: `---
 name: nuxt-ui
@@ -277,7 +298,7 @@ Reference these resources when working with Nuxt UI.`
                       />
                     </div>
                     <Button
-                      onClick={handleSubmit}
+                      onClick={() => handleSubmit()}
                       disabled={!isValid}
                       className="h-12 px-8 shadow-lg hover:shadow-primary/25 transition-all"
                     >
@@ -286,7 +307,7 @@ Reference these resources when working with Nuxt UI.`
                   </div>
                   <div className="flex items-center gap-3 mt-3 px-1">
                     <p className="text-xs text-muted-foreground/60">
-                      We&apos;ll fetch /llms.txt from this URL automatically.
+                      Paste a base URL or a direct llms.txt link.
                     </p>
                     <span className="text-border/40 select-none">|</span>
                     <button 
@@ -307,7 +328,7 @@ Reference these resources when working with Nuxt UI.`
                     className="min-h-[200px] font-mono text-sm bg-card border-border mb-4"
                   />
                   <Button
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                     disabled={!isValid}
                     className="h-12 px-6 shadow-lg hover:shadow-primary/25 transition-all"
                   >
@@ -384,6 +405,13 @@ Reference these resources when working with Nuxt UI.`
         {/* Success State */}
         {state === "success" && result && (
           <div className="space-y-12">
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              Back
+            </button>
             <section className="border border-border rounded-xl overflow-hidden bg-card/30 backdrop-blur-sm transition-all hover:border-border/80 shadow-sm">
               {/* Header */}
               <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between bg-muted/10">
@@ -391,7 +419,32 @@ Reference these resources when working with Nuxt UI.`
                   <div>
                     <h3 className="font-mono font-medium text-sm">{result.skillName}</h3>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      {result.isUpdate ? (
+                      {result.publishFailed ? (
+                        <span className="flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-red-500" />
+                          Generated · publish failed
+                        </span>
+                      ) : result.alreadyExists && result.contentChanged ? (
+                        <span className="flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-orange-500" />
+                          Source content changed
+                          {result.existingMetadata?.updatedAt && (
+                            <span className="text-muted-foreground/60">
+                              · last published {new Date(result.existingMetadata.updatedAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </span>
+                      ) : result.alreadyExists ? (
+                        <span className="flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-blue-500" />
+                          Already published · up to date
+                          {result.existingMetadata?.updatedAt && (
+                            <span className="text-muted-foreground/60">
+                              · {new Date(result.existingMetadata.updatedAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </span>
+                      ) : result.isUpdate ? (
                         <span className="flex items-center gap-1.5">
                           <span className="size-1.5 rounded-full bg-amber-500" />
                           Updated in-place
@@ -405,18 +458,28 @@ Reference these resources when working with Nuxt UI.`
                     </div>
                   </div>
                 </div>
-                <a
-                  href={result.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-muted/50"
-                >
-                  View Source <LinkIcon className="w-3 h-3" />
-                </a>
+                {result.githubUrl && (
+                  <a
+                    href={result.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-muted/50"
+                  >
+                    View Source <LinkIcon className="w-3 h-3" />
+                  </a>
+                )}
               </div>
 
               {/* Content */}
               <div className="p-6 space-y-6">
+                {result.publishFailed && (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    Publishing to GitHub failed. You can still copy the generated skill below.
+                  </div>
+                )}
+
+                {result.command ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Install Command</label>
@@ -441,6 +504,7 @@ Reference these resources when working with Nuxt UI.`
                     </div>
                   </div>
                 </div>
+                ) : null}
 
                 <Collapsible open={previewOpen} onOpenChange={setPreviewOpen}>
                   <div className="pt-4 border-t border-border/30">
@@ -482,9 +546,16 @@ Reference these resources when working with Nuxt UI.`
 
 
 
-            <Button variant="outline" onClick={handleReset}>
-              Convert Another
-            </Button>
+            <div className="flex gap-3">
+              {result.alreadyExists && result.contentChanged && (
+                <Button onClick={handleRegenerate}>
+                  Regenerate
+                </Button>
+              )}
+              <Button variant="outline" onClick={handleReset}>
+                Convert Another
+              </Button>
+            </div>
           </div>
         )}
 
