@@ -1,6 +1,7 @@
 import { App } from '@octokit/app';
 import { Octokit } from '@octokit/rest';
 import { PublishMetadata } from './types';
+import { upsertSkillInDB } from './db';
 
 const APP_ID = process.env.GITHUB_APP_ID;
 const PRIVATE_KEY = process.env.GITHUB_APP_PRIVATE_KEY;
@@ -325,9 +326,27 @@ export async function publishSkill(
       sha: newCommitData.sha,
     });
 
+    const githubUrl = `https://github.com/${ORG}/${REPO}/tree/main/${skillName}`;
+    const installCommand = `npx skills add ${ORG}/${REPO} --skill ${skillName}`;
+
+    // Also save to D1 database for fast listing
+    try {
+      await upsertSkillInDB({
+        name: skillName,
+        sourceUrl: sourceUrl || null,
+        githubUrl,
+        installCommand,
+        contentHash: contentHash || null,
+        generatorVersion: GENERATOR_VERSION,
+      });
+    } catch (dbError: any) {
+      // Log but don't fail - GitHub is the source of truth
+      console.error('D1 upsert failed (non-fatal):', dbError?.message);
+    }
+
     return {
-      url: `https://github.com/${ORG}/${REPO}/tree/main/${skillName}`,
-      command: `npx skills add ${ORG}/${REPO} --skill ${skillName}`,
+      url: githubUrl,
+      command: installCommand,
       isUpdate,
     };
   } catch (error: any) {

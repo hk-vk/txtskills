@@ -20,3 +20,9 @@ directory = ".open-next/assets"
 [[services]]
 binding = "WORKER_SELF_REFERENCE"
 service = "txtskills"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "txtskills-db"
+database_id = "dd245ad0-8950-44d1-a35d-27c1522e9026"
