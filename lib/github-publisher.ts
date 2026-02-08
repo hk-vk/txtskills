@@ -344,6 +344,14 @@ export async function publishSkill(
       console.error('D1 upsert failed (non-fatal):', dbError?.message);
     }
 
+    // Update skills.json manifest after publishing
+    try {
+      await updateSkillsManifest();
+    } catch (manifestError: any) {
+      // Log but don't fail the publish
+      console.error('Manifest update failed (non-fatal):', manifestError?.message);
+    }
+
     return {
       url: githubUrl,
       command: installCommand,
@@ -352,5 +360,87 @@ export async function publishSkill(
   } catch (error: any) {
     console.error('GitHub Publish Error:', error?.response?.data?.message || error?.message);
     throw new Error('Failed to publish to GitHub.');
+  }
+}
+
+/**
+ * Update the skills.json manifest file in the repo.
+ * This file is required by the `skills` CLI to list available skills.
+ */
+export async function updateSkillsManifest(): Promise<void> {
+  const octokit = await getOctokit();
+  
+  try {
+    // Get all skills
+    const skills = await listAllSkills();
+    
+    // Create manifest JSON
+    const manifest = {
+      skills: skills.map(s => ({
+        name: s.name,
+        sourceUrl: s.metadata?.sourceUrl || null,
+      })),
+    };
+    
+    const manifestContent = JSON.stringify(manifest, null, 2);
+    
+    // Get latest commit SHA
+    const { data: refData } = await octokit.git.getRef({
+      owner: ORG,
+      repo: REPO,
+      ref: 'heads/main',
+    });
+    const latestCommitSha = refData.object.sha;
+    
+    // Get the tree
+    const { data: commitData } = await octokit.git.getCommit({
+      owner: ORG,
+      repo: REPO,
+      commit_sha: latestCommitSha,
+    });
+    const treeSha = commitData.tree.sha;
+    
+    // Create blob for skills.json
+    const { data: blobData } = await octokit.git.createBlob({
+      owner: ORG,
+      repo: REPO,
+      content: manifestContent,
+      encoding: 'utf-8',
+    });
+    
+    // Create new tree
+    const { data: newTreeData } = await octokit.git.createTree({
+      owner: ORG,
+      repo: REPO,
+      base_tree: treeSha,
+      tree: [
+        {
+          path: 'skills.json',
+          mode: '100644',
+          type: 'blob',
+          sha: blobData.sha,
+        },
+      ],
+    });
+    
+    // Create commit
+    const { data: newCommitData } = await octokit.git.createCommit({
+      owner: ORG,
+      repo: REPO,
+      message: 'Update skills.json manifest',
+      tree: newTreeData.sha,
+      parents: [latestCommitSha],
+    });
+    
+    // Update main branch
+    await octokit.git.updateRef({
+      owner: ORG,
+      repo: REPO,
+      ref: 'heads/main',
+      sha: newCommitData.sha,
+    });
+  } catch (error: any) {
+    console.error('Failed to update skills.json:', error?.message);
+    throw new Error('Failed to update skills manifest.');
   }
 }
