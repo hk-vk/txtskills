@@ -1,0 +1,26 @@
+# Allow search engines to crawl and index
+User-agent: *
+Allow: /
+Allow: /skills
+Disallow: /api/
+Disallow: /.next/
+Disallow: /private/
+
+# Specific rules for Googlebot
+User-agent: Googlebot
+Allow: /
+Allow: /skills
+Disallow: /api/
+
+# Specific rules for Bingbot
+User-agent: Bingbot
+Allow: /
+Allow: /skills
+Disallow: /api/
+
+# Crawl delay
+Crawl-delay: 1
+Request-rate: 30/60
+
+# Sitemaps
+Sitemap: /sitemap.xml

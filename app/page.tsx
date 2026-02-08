@@ -217,6 +217,7 @@ export default function Home() {
               <h1
                 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
                 style={{ fontFamily: "'Doto', sans-serif" }}
+                itemProp="name"
               >
                 txtskills
               </h1>
