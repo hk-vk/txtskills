@@ -1,33 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
-
-interface SkillListItem {
-  name: string;
-  url: string;
-  command: string;
-  metadata: {
-    sourceUrl: string | null;
-    generatedAt: string;
-    updatedAt: string;
-  } | null;
-}
+import { useSkillsCache } from "@/hooks/use-skills-cache";
 
 export default function SkillsPage() {
-  const [skills, setSkills] = useState<SkillListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { skills, loading } = useSkillsCache();
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/skills")
-      .then((res) => res.json())
-      .then((data) => setSkills(data.skills || []))
-      .catch(() => setSkills([]))
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleCopy = async (command: string, name: string) => {
     await navigator.clipboard.writeText(command);

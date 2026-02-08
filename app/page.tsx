@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { invalidateSkillsCache } from "@/hooks/use-skills-cache";
 import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@/components/icons/agent-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,6 +126,10 @@ export default function Home() {
       }
 
       setResult(data);
+      // Invalidate skills cache so /skills page refetches after new publish
+      if (!data.publishFailed && !data.alreadyExists) {
+        invalidateSkillsCache();
+      }
       // Auto-expand preview when publish failed (no install command available)
       if (data.publishFailed) {
         setPreviewOpen(true);
@@ -167,16 +172,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Top nav */}
-      <nav className="max-w-4xl mx-auto px-6 pt-6 flex justify-end">
-        <Link
-          href="/skills"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-        >
-          All skills
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </Link>
-      </nav>
       <div className="max-w-4xl mx-auto px-6 py-10 md:py-20">
 
         {/* Header */}
@@ -187,7 +182,7 @@ export default function Home() {
               backgroundImage: 'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
               backgroundSize: '24px 24px'
             }} />
-            <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
+
           </div>
           
           {/* Main title section */}
@@ -256,9 +251,10 @@ export default function Home() {
                     <Button
                       onClick={() => handleSubmit()}
                       disabled={!isValid}
-                      className="h-12 px-8 shadow-lg hover:shadow-primary/25 transition-all"
+                      className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all"
                     >
                       Convert
+                      <span className="text-primary-foreground/50 text-xs">→</span>
                     </Button>
                   </div>
                   <div className="mt-3 px-1">
@@ -278,15 +274,27 @@ export default function Home() {
                   <Button
                     onClick={() => handleSubmit()}
                     disabled={!isValid}
-                    className="h-12 px-6 shadow-lg hover:shadow-primary/25 transition-all"
+                    className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all"
                   >
                     Convert
+                    <span className="text-primary-foreground/50 text-xs">→</span>
                   </Button>
                 </TabsPanel>
               </Tabs>
 
+              {/* Browse Skills Link */}
+              <div className="mt-12 mb-8">
+                <Link
+                  href="/skills"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 w-fit"
+                >
+                  Browse all skills
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </Link>
+              </div>
+
               {/* Works With - Agent Compatibility */}
-              <div className="mt-12 space-y-4">
+              <div className="space-y-4">
                 <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold opacity-70">Compatible with</span>
                 <div className="flex flex-wrap items-center gap-3">
                   {/* Claude Code */}
@@ -360,7 +368,7 @@ export default function Home() {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
               Back
             </button>
-            <section className="border border-border rounded-xl overflow-hidden bg-card/30 backdrop-blur-sm transition-all hover:border-border/80 shadow-sm">
+            <section className="border border-border rounded-xl overflow-hidden bg-card/30 transition-all hover:border-border/80 shadow-sm">
               {/* Header */}
               <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between bg-muted/10">
                 <div className="flex items-center gap-3">
@@ -433,7 +441,7 @@ export default function Home() {
                     <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Install Command</label>
                   </div>
                   <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+
                     <div className="relative flex items-center gap-3 bg-black/5 dark:bg-black/40 border border-border/50 rounded-lg p-4 font-mono text-sm">
                       <span className="text-primary/70 select-none">$</span>
                       <span className="flex-1 overflow-x-auto scrollbar-hide selection:bg-primary/20 text-foreground/90">{result.command}</span>
@@ -532,14 +540,14 @@ export default function Home() {
         {/* Footer */}
         <footer className="mt-24 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            Built for the{" "}
+            Built for and inspired by the{" "}
             <a
               href="https://skills.sh"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-4 hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors inline-flex items-center gap-0.5"
             >
-              skills.sh
+              <span className="text-xs">&#9650;</span>/<span>skills</span>
             </a>
             {" "}ecosystem
           </p>
