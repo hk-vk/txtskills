@@ -4,7 +4,7 @@ import { fetchLlmsTxt } from '@/lib/fetcher';
 import { parseLlmsTxt } from '@/lib/llms-parser';
 import { generateSkill } from '@/lib/skill-generator';
 import { publishSkill, getExistingSkill } from '@/lib/github-publisher';
-import { slugify } from '@/lib/slugify';
+import { slugify, validateSkillName } from '@/lib/slugify';
 import { ConversionRequest, ConversionResult } from '@/lib/types';
 
 export const maxDuration = 60;
@@ -50,7 +50,14 @@ export async function POST(req: NextRequest) {
 
     // Use custom name if provided and valid, otherwise auto-generate
     let skillName: string;
-    if (body.customName && /^[a-z][a-z0-9-]*$/.test(body.customName) && body.customName.length <= 64) {
+    if (body.customName) {
+      const nameError = validateSkillName(body.customName);
+      if (nameError) {
+        return NextResponse.json({
+          success: false,
+          error: { type: 'validation', message: `Invalid skill name: ${nameError}` }
+        } as ConversionResult, { status: 400 });
+      }
       skillName = body.customName;
     } else {
       skillName = slugify(parsed.title);

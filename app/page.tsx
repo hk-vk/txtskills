@@ -182,7 +182,19 @@ export default function Home() {
     setCustomName("");
   };
 
-  const isValid = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
+  const getCustomNameError = (name: string): string | null => {
+    if (!name) return null;
+    if (name.length > 64) return "Must be 64 characters or fewer";
+    if (!/^[a-z0-9-]+$/.test(name)) return "Only lowercase letters, numbers, and hyphens allowed";
+    if (name.startsWith("-")) return "Must not start with a hyphen";
+    if (name.endsWith("-")) return "Must not end with a hyphen";
+    if (name.includes("--")) return "Must not contain consecutive hyphens";
+    return null;
+  };
+
+  const customNameError = getCustomNameError(customName);
+  const hasInput = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
+  const isValid = hasInput && !customNameError;
 
   return (
     <main className="min-h-screen bg-background">
@@ -273,11 +285,36 @@ export default function Home() {
                       <span className="text-primary-foreground/50 text-xs">→</span>
                     </Button>
                   </div>
-                  <div className="mt-3 px-1">
-                    <p className="text-xs text-muted-foreground/60">
-                      Paste a base URL or a direct llms.txt link.
-                    </p>
+                  <div className="grid transition-all duration-300 ease-in-out" style={{ gridTemplateRows: url.trim() ? '1fr' : '0fr' }}>
+                    <div className="overflow-hidden">
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-xs text-muted-foreground/50 shrink-0">as</span>
+                        <Input
+                          type="text"
+                          placeholder="custom-skill-name (optional)"
+                          value={customName}
+                          onChange={(e) => {
+                            const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                            setCustomName(sanitized);
+                          }}
+                          maxLength={64}
+                          className={`font-mono h-9 text-xs max-w-[260px] bg-card text-muted-foreground focus:text-foreground ${customNameError ? 'border-red-400/30 focus-visible:ring-red-400/10' : 'border-border/50'}`}
+                          autoComplete="off"
+                          spellCheck="false"
+                        />
+                      </div>
+                      {customNameError && (
+                        <p className="text-[11px] text-red-400/50 mt-1 ml-6">{customNameError}</p>
+                      )}
+                    </div>
                   </div>
+                  {!url.trim() && (
+                    <div className="mt-3 px-1">
+                      <p className="text-xs text-muted-foreground/60">
+                        Paste a base URL or a direct llms.txt link.
+                      </p>
+                    </div>
+                  )}
                 </TabsPanel>
 
                 <TabsPanel value="paste">
@@ -287,6 +324,30 @@ export default function Home() {
                     onChange={(e) => setContent(e.target.value)}
                     className="min-h-[200px] font-mono text-sm bg-card border-border mb-4"
                   />
+                  <div className="grid transition-all duration-300 ease-in-out" style={{ gridTemplateRows: content.trim() ? '1fr' : '0fr' }}>
+                    <div className="overflow-hidden">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs text-muted-foreground/50 shrink-0">as</span>
+                        <Input
+                          type="text"
+                          placeholder="custom-skill-name (optional)"
+                          value={customName}
+                          onChange={(e) => {
+                            const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                            setCustomName(sanitized);
+                          }}
+                          maxLength={64}
+                          className={`font-mono h-9 text-xs max-w-[260px] bg-card text-muted-foreground focus:text-foreground ${customNameError ? 'border-red-400/30 focus-visible:ring-red-400/10' : 'border-border/50'}`}
+                          autoComplete="off"
+                          spellCheck="false"
+                        />
+                      </div>
+                      {customNameError && (
+                        <p className="text-[11px] text-red-400/50 mb-3 ml-6">{customNameError}</p>
+                      )}
+                      {!customNameError && <div className="mb-3" />}
+                    </div>
+                  </div>
                   <Button
                     onClick={() => handleSubmit()}
                     disabled={!isValid}
@@ -297,29 +358,6 @@ export default function Home() {
                   </Button>
                 </TabsPanel>
               </Tabs>
-
-              {/* Optional custom skill name */}
-              <div className="mt-6">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
-                  Skill name <span className="normal-case tracking-normal opacity-60">(optional)</span>
-                </label>
-                <Input
-                  type="text"
-                  placeholder="custom-skill-name"
-                  value={customName}
-                  onChange={(e) => {
-                    const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-                    setCustomName(sanitized);
-                  }}
-                  maxLength={64}
-                  className="font-mono h-10 max-w-sm bg-card border-border"
-                  autoComplete="off"
-                  spellCheck="false"
-                />
-                <p className="text-xs text-muted-foreground/60 mt-1.5 px-1">
-                  Lowercase letters, numbers, and hyphens only. Leave blank to auto-generate from title.
-                </p>
-              </div>
 
               {/* Browse Skills Link */}
               <div className="mt-12 mb-8">
