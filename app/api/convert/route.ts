@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       }
     } else if (body.type === 'content' && body.content) {
       content = body.content;
+      sourceUrl = body.sourceUrl; // Allow passing sourceUrl with content
     } else {
       return NextResponse.json({ 
         success: false, 
