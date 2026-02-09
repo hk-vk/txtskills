@@ -9,11 +9,25 @@
       "cache": false,
       "persistent": true
     },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
     "lint": {
       "dependsOn": ["^build"]
     },
     "deploy": {
       "dependsOn": ["build"],
+      "cache": false
+    },
+    "preview": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "cf-typegen": {
+      "cache": false
+    },
+    "clean": {
       "cache": false
     }
   }

@@ -4,10 +4,20 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:web": "turbo run build --filter=@txtskills/web",
+    "build:tui": "turbo run build --filter=@txtskills/tui",
     "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@txtskills/web",
+    "dev:tui": "turbo run dev --filter=@txtskills/tui",
     "lint": "turbo run lint",
+    "lint:web": "turbo run lint --filter=@txtskills/web",
+    "start:web": "turbo run start --filter=@txtskills/web",
+    "start:tui": "turbo run start --filter=@txtskills/tui",
     "deploy": "turbo run deploy",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "deploy:web": "turbo run deploy --filter=@txtskills/web",
+    "preview:web": "turbo run preview --filter=@txtskills/web",
+    "cf-typegen": "turbo run cf-typegen --filter=@txtskills/web",
+    "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
     "turbo": "^2"
