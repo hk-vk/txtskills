@@ -1,0 +1,31 @@
+{
+    "name": "txtskills",
+    "version": "0.1.0",
+    "description": "Install individual skills from txtskills registry without cloning the entire repo",
+    "type": "module",
+    "bin": {
+        "txtskills": "./dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup",
+        "start": "node dist/index.js",
+        "clean": "rm -rf dist .turbo node_modules"
+    },
+    "dependencies": {
+        "@clack/prompts": "^0.11.0",
+        "commander": "^13.1.0",
+        "picocolors": "^1.1.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22",
+        "tsup": "^8.5.0",
+        "typescript": "^5"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}

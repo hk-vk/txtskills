@@ -6,6 +6,7 @@
     "build": "turbo run build",
     "build:web": "turbo run build --filter=@txtskills/web",
     "build:tui": "turbo run build --filter=@txtskills/tui",
+    "build:cli": "turbo run build --filter=txtskills",
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter=@txtskills/web",
     "dev:tui": "turbo run dev --filter=@txtskills/tui",
