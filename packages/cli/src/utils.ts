@@ -1,15 +1,23 @@
 import pc from "picocolors";
 
-// txtskills ASCII banner — pixel/blocky style matching the web app's Doto font aesthetic
+// txtskills ASCII banner — graffiti style
 const LOGO_LINES = [
-  "▀█▀ ▀▄▀ ▀█▀ █▀ █▄▀ █ █   █   █▀",
-  " █  █ █  █  ▄█ █ █ █ █▄▄ █▄▄ ▄█",
+  "  __            __          __   .__.__  .__          ",
+  "_/  |____  ____/  |_  _____|  | _|__|  | |  |   ______",
+  "\\   __\\  \\/  /\\   __\\/  ___/  |/ /  |  | |  |  /  ___/",
+  " |  |  >    <  |  |  \\___ \\|    <|  |  |_|  |__\\___ \\ ",
+  " |__| /__/\\_ \\ |__| /____  >__|_ \\__|____/____/____  >",
+  "            \\/           \\/     \\/                 \\/ ",
 ];
 
-// Gradient grays — subtle fade matching the web app's muted aesthetic
+// Gradient grays — 6 lines fading from bright to dim
 const GRAYS = [
-  "\x1b[38;5;248m", // lighter
-  "\x1b[38;5;243m", // darker
+  "\x1b[38;5;252m",
+  "\x1b[38;5;250m",
+  "\x1b[38;5;248m",
+  "\x1b[38;5;246m",
+  "\x1b[38;5;244m",
+  "\x1b[38;5;240m",
 ];
 const RESET = "\x1b[0m";
 
