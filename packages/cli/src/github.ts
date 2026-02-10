@@ -8,6 +8,7 @@ import {
   DEFAULT_REPO,
   DEFAULT_BRANCH,
   MANIFEST_FILE,
+  REGISTRY_PREFIX,
   getApiHeaders,
 } from "./config.js";
 
@@ -88,13 +89,13 @@ export async function fetchManifest(
 }
 
 /**
- * List available skill directories from the repo root
+ * List available skill directories from the registry folder
  */
 export async function listSkillDirs(
   owner = DEFAULT_OWNER,
   repo = DEFAULT_REPO
 ): Promise<{ items: GitHubContentItem[]; rateLimit: RateLimitInfo }> {
-  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/`;
+  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${REGISTRY_PREFIX}`;
   const response = await fetch(url, { headers: getApiHeaders() });
 
   if (!response.ok) {
@@ -125,7 +126,8 @@ export async function listSkillFiles(
   owner = DEFAULT_OWNER,
   repo = DEFAULT_REPO
 ): Promise<{ items: GitHubContentItem[]; rateLimit: RateLimitInfo }> {
-  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(skillName)}`;
+  const skillPath = `${REGISTRY_PREFIX}/${skillName}`;
+  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(skillPath)}`;
   const response = await fetch(url, { headers: getApiHeaders() });
 
   if (!response.ok) {
@@ -236,7 +238,8 @@ export async function skillExists(
   owner = DEFAULT_OWNER,
   repo = DEFAULT_REPO
 ): Promise<boolean> {
-  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(skillName)}`;
+  const skillPath = `${REGISTRY_PREFIX}/${skillName}`;
+  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(skillPath)}`;
   const response = await fetch(url, {
     method: "HEAD",
     headers: getApiHeaders(),

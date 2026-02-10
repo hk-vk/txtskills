@@ -8,6 +8,7 @@ const PRIVATE_KEY = process.env.GITHUB_APP_PRIVATE_KEY;
 const INSTALLATION_ID = process.env.GITHUB_INSTALLATION_ID;
 const ORG = process.env.GITHUB_ORG || 'hk-vk';
 const REPO = process.env.GITHUB_REPO || 'skills';
+const REGISTRY_PREFIX = 'registry';
 const GENERATOR_VERSION = '1.0.0';
 
 let cachedOctokit: Octokit | null = null;
@@ -45,7 +46,7 @@ async function getOctokit() {
 
   // Cache for 50 minutes (installation tokens last 1 hour)
   tokenExpiry = Date.now() + 50 * 60 * 1000;
-  
+
   return cachedOctokit;
 }
 
@@ -58,7 +59,7 @@ async function skillExists(octokit: Octokit, skillName: string): Promise<boolean
     await octokit.repos.getContent({
       owner: ORG,
       repo: REPO,
-      path: `${skillName}/SKILL.md`,
+      path: `${REGISTRY_PREFIX}/${skillName}/SKILL.md`,
     });
     return true;
   } catch (e: any) {
@@ -89,7 +90,7 @@ export async function listAllSkills(): Promise<Array<{
       repo: REPO,
       ref: 'heads/main',
     });
-    
+
     // Fetch the ENTIRE repo tree recursively in ONE API call
     const { data: treeData } = await octokit.git.getTree({
       owner: ORG,
@@ -104,15 +105,15 @@ export async function listAllSkills(): Promise<Array<{
 
     for (const item of treeData.tree) {
       if (!item.path) continue;
-      
-      // Identify skill directories by SKILL.md presence
-      const skillMdMatch = item.path.match(/^([^/]+)\/SKILL\.md$/);
+
+      // Identify skill directories by SKILL.md presence (inside registry/ folder)
+      const skillMdMatch = item.path.match(/^registry\/([^/]+)\/SKILL\.md$/);
       if (skillMdMatch) {
         skillDirs.add(skillMdMatch[1]);
       }
-      
+
       // Track metadata blob SHAs for later fetching
-      const metaMatch = item.path.match(/^([^/]+)\/\.metadata\.json$/);
+      const metaMatch = item.path.match(/^registry\/([^/]+)\/\.metadata\.json$/);
       if (metaMatch && item.sha) {
         metadataBlobShas.set(metaMatch[1], item.sha);
       }
@@ -132,7 +133,7 @@ export async function listAllSkills(): Promise<Array<{
         batch.map(async (skillName) => {
           const blobSha = metadataBlobShas.get(skillName);
           if (!blobSha) return { skillName, metadata: null };
-          
+
           try {
             const { data } = await octokit.git.getBlob({
               owner: ORG,
@@ -146,7 +147,7 @@ export async function listAllSkills(): Promise<Array<{
           }
         })
       );
-      
+
       for (const { skillName, metadata } of batchResults) {
         metadataMap.set(skillName, metadata);
       }
@@ -156,7 +157,7 @@ export async function listAllSkills(): Promise<Array<{
     const skills = skillNames
       .map(name => ({
         name,
-        url: `https://github.com/${ORG}/${REPO}/tree/main/${name}`,
+        url: `https://github.com/${ORG}/${REPO}/tree/main/${REGISTRY_PREFIX}/${name}`,
         command: `npx skills add ${ORG}/${REPO} --skill ${name}`,
         metadata: metadataMap.get(name) || null,
       }))
@@ -186,7 +187,7 @@ export async function getExistingSkill(skillName: string): Promise<{
     const { data: skillFile } = await octokit.repos.getContent({
       owner: ORG,
       repo: REPO,
-      path: `${skillName}/SKILL.md`,
+      path: `${REGISTRY_PREFIX}/${skillName}/SKILL.md`,
     });
 
     if (!('content' in skillFile)) return null;
@@ -199,7 +200,7 @@ export async function getExistingSkill(skillName: string): Promise<{
       const { data: metaFile } = await octokit.repos.getContent({
         owner: ORG,
         repo: REPO,
-        path: `${skillName}/.metadata.json`,
+        path: `${REGISTRY_PREFIX}/${skillName}/.metadata.json`,
       });
       if ('content' in metaFile) {
         const metaContent = Buffer.from(metaFile.content, 'base64').toString('utf-8');
@@ -212,7 +213,7 @@ export async function getExistingSkill(skillName: string): Promise<{
     return {
       skillContent,
       metadata,
-      url: `https://github.com/${ORG}/${REPO}/tree/main/${skillName}`,
+      url: `https://github.com/${ORG}/${REPO}/tree/main/${REGISTRY_PREFIX}/${skillName}`,
       command: `npx skills add ${ORG}/${REPO} --skill ${skillName}`,
     };
   } catch (e: any) {
@@ -233,7 +234,7 @@ export async function publishSkill(
   contentHash?: string
 ): Promise<{ url: string; command: string; isUpdate: boolean }> {
   const octokit = await getOctokit();
-  
+
   const isUpdate = await skillExists(octokit, skillName);
   const now = new Date().toISOString();
 
@@ -247,8 +248,8 @@ export async function publishSkill(
     generatorVersion: GENERATOR_VERSION,
   };
 
-  const skillPath = `${skillName}/SKILL.md`;
-  const metadataPath = `${skillName}/.metadata.json`;
+  const skillPath = `${REGISTRY_PREFIX}/${skillName}/SKILL.md`;
+  const metadataPath = `${REGISTRY_PREFIX}/${skillName}/.metadata.json`;
   const metadataContent = JSON.stringify(metadata, null, 2);
 
   try {
@@ -326,7 +327,7 @@ export async function publishSkill(
       sha: newCommitData.sha,
     });
 
-    const githubUrl = `https://github.com/${ORG}/${REPO}/tree/main/${skillName}`;
+    const githubUrl = `https://github.com/${ORG}/${REPO}/tree/main/${REGISTRY_PREFIX}/${skillName}`;
     const installCommand = `npx skills add ${ORG}/${REPO} --skill ${skillName}`;
 
     // Also save to D1 database for fast listing
@@ -361,11 +362,11 @@ export async function publishSkill(
  */
 export async function updateSkillsManifest(): Promise<void> {
   const octokit = await getOctokit();
-  
+
   try {
     // Get all skills
     const skills = await listAllSkills();
-    
+
     // Create manifest JSON
     const manifest = {
       skills: skills.map(s => ({
@@ -373,9 +374,9 @@ export async function updateSkillsManifest(): Promise<void> {
         sourceUrl: s.metadata?.sourceUrl || null,
       })),
     };
-    
+
     const manifestContent = JSON.stringify(manifest, null, 2);
-    
+
     // Get latest commit SHA
     const { data: refData } = await octokit.git.getRef({
       owner: ORG,
@@ -383,7 +384,7 @@ export async function updateSkillsManifest(): Promise<void> {
       ref: 'heads/main',
     });
     const latestCommitSha = refData.object.sha;
-    
+
     // Get the tree
     const { data: commitData } = await octokit.git.getCommit({
       owner: ORG,
@@ -391,7 +392,7 @@ export async function updateSkillsManifest(): Promise<void> {
       commit_sha: latestCommitSha,
     });
     const treeSha = commitData.tree.sha;
-    
+
     // Create blob for skills.json
     const { data: blobData } = await octokit.git.createBlob({
       owner: ORG,
@@ -399,7 +400,7 @@ export async function updateSkillsManifest(): Promise<void> {
       content: manifestContent,
       encoding: 'utf-8',
     });
-    
+
     // Create new tree
     const { data: newTreeData } = await octokit.git.createTree({
       owner: ORG,
@@ -414,7 +415,7 @@ export async function updateSkillsManifest(): Promise<void> {
         },
       ],
     });
-    
+
     // Create commit
     const { data: newCommitData } = await octokit.git.createCommit({
       owner: ORG,
@@ -423,7 +424,7 @@ export async function updateSkillsManifest(): Promise<void> {
       tree: newTreeData.sha,
       parents: [latestCommitSha],
     });
-    
+
     // Update main branch
     await octokit.git.updateRef({
       owner: ORG,

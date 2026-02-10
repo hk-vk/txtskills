@@ -7,6 +7,9 @@ export const DEFAULT_REPO = "skills";
 /** Default branch */
 export const DEFAULT_BRANCH = "main";
 
+/** Skills registry folder prefix within the repo */
+export const REGISTRY_PREFIX = "registry";
+
 /** GitHub API base URL */
 export const GITHUB_API = "https://api.github.com";
 
