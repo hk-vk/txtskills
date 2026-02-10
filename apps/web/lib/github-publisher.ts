@@ -158,7 +158,7 @@ export async function listAllSkills(): Promise<Array<{
       .map(name => ({
         name,
         url: `https://github.com/${ORG}/${REPO}/tree/main/${REGISTRY_PREFIX}/${name}`,
-        command: `npx skills add ${ORG}/${REPO} --skill ${name}`,
+        command: `npx txtskills add ${name}`,
         metadata: metadataMap.get(name) || null,
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -214,7 +214,7 @@ export async function getExistingSkill(skillName: string): Promise<{
       skillContent,
       metadata,
       url: `https://github.com/${ORG}/${REPO}/tree/main/${REGISTRY_PREFIX}/${skillName}`,
-      command: `npx skills add ${ORG}/${REPO} --skill ${skillName}`,
+      command: `npx txtskills add ${skillName}`,
     };
   } catch (e: any) {
     if (e.status === 404) return null;
@@ -328,7 +328,7 @@ export async function publishSkill(
     });
 
     const githubUrl = `https://github.com/${ORG}/${REPO}/tree/main/${REGISTRY_PREFIX}/${skillName}`;
-    const installCommand = `npx skills add ${ORG}/${REPO} --skill ${skillName}`;
+    const installCommand = `npx txtskills add ${skillName}`;
 
     // Also save to D1 database for fast listing
     try {
