@@ -37,6 +37,9 @@ export async function GET() {
       } | null;
     }> = [];
 
+    // Helper to generate install command from skill name (always current format)
+    const getInstallCommand = (name: string) => `npx txtskills add ${name}`;
+
     try {
       // Try D1 database first (much faster)
       const dbSkills = await listSkillsFromDB();
@@ -44,7 +47,7 @@ export async function GET() {
         skills = dbSkills.map((s) => ({
           name: s.name,
           url: s.github_url,
-          command: s.install_command,
+          command: getInstallCommand(s.name), // Generate dynamically
           metadata: {
             sourceUrl: s.source_url,
             generatedAt: s.created_at,
@@ -53,14 +56,22 @@ export async function GET() {
         }));
       } else {
         // D1 empty, fall back to GitHub API
-        skills = await listAllSkills();
+        const githubSkills = await listAllSkills();
+        skills = githubSkills.map((s) => ({
+          ...s,
+          command: getInstallCommand(s.name), // Generate dynamically
+        }));
       }
     } catch (dbError) {
       // D1 failed (expected in local dev), fall back to GitHub API
       if (process.env.NODE_ENV === 'production') {
         console.warn('D1 query failed, falling back to GitHub');
       }
-      skills = await listAllSkills();
+      const githubSkills = await listAllSkills();
+      skills = githubSkills.map((s) => ({
+        ...s,
+        command: getInstallCommand(s.name), // Generate dynamically
+      }));
     }
 
     const responseData = { skills };
