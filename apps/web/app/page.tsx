@@ -287,10 +287,10 @@ export default function Home() {
                     <Button
                       onClick={() => handleSubmit()}
                       disabled={!isValid}
-                      className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all"
+                      className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
                     >
                       Convert
-                      <span className="text-primary-foreground/50 text-xs">→</span>
+                      <span className="text-zinc-400 dark:text-zinc-500 text-xs">→</span>
                     </Button>
                   </div>
                   <div className="grid transition-all duration-300 ease-in-out" style={{ gridTemplateRows: url.trim() ? '1fr' : '0fr' }}>
@@ -365,10 +365,10 @@ export default function Home() {
                   <Button
                     onClick={() => handleSubmit()}
                     disabled={!isValid}
-                    className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all"
+                    className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
                   >
                     Convert
-                    <span className="text-primary-foreground/50 text-xs">→</span>
+                    <span className="text-zinc-400 dark:text-zinc-500 text-xs">→</span>
                   </Button>
                 </TabsPanel>
               </Tabs>
@@ -459,46 +459,46 @@ export default function Home() {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
               Back
             </button>
-            <section className="border border-border rounded-xl overflow-hidden bg-card/30 transition-all hover:border-border/80 shadow-sm">
+            <section className="border border-border/60 rounded-2xl overflow-hidden bg-card/50 backdrop-blur-sm transition-all shadow-sm">
               {/* Header */}
-              <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between bg-muted/10">
+              <div className="px-6 py-5 border-b border-border/40 flex items-center justify-between bg-gradient-to-b from-muted/20 to-transparent">
                 <div className="flex items-center gap-3">
                   <div>
-                    <h3 className="font-mono font-medium text-sm">{result.skillName}</h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <h3 className="font-mono font-semibold text-base">{result.skillName}</h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                       {result.publishFailed ? (
-                        <span className="flex items-center gap-1.5">
-                          <span className="size-1.5 rounded-full bg-red-500" />
-                          Generated · publish failed
+                        <span className="flex items-center gap-1.5 text-red-500/80">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
+                          Publish failed
                         </span>
                       ) : result.alreadyExists && result.contentChanged ? (
-                        <span className="flex items-center gap-1.5">
-                          <span className="size-1.5 rounded-full bg-orange-500" />
-                          Source content changed
+                        <span className="flex items-center gap-1.5 text-amber-600/80 dark:text-amber-500/70">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
+                          Content changed
                           {result.existingMetadata?.updatedAt && (
-                            <span className="text-muted-foreground/60">
-                              · last published {new Date(result.existingMetadata.updatedAt).toLocaleDateString()}
+                            <span className="text-muted-foreground/50">
+                              · {new Date(result.existingMetadata.updatedAt).toLocaleDateString()}
                             </span>
                           )}
                         </span>
                       ) : result.alreadyExists ? (
-                        <span className="flex items-center gap-1.5">
-                          <span className="size-1.5 rounded-full bg-blue-500" />
-                          Already published · up to date
+                        <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                          Up to date
                           {result.existingMetadata?.updatedAt && (
-                            <span className="text-muted-foreground/60">
+                            <span className="text-muted-foreground/50">
                               · {new Date(result.existingMetadata.updatedAt).toLocaleDateString()}
                             </span>
                           )}
                         </span>
                       ) : result.isUpdate ? (
-                        <span className="flex items-center gap-1.5">
-                          <span className="size-1.5 rounded-full bg-amber-500" />
-                          Updated in-place
+                        <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>
+                          Updated
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1.5">
-                          <span className="size-1.5 rounded-full bg-emerald-500" />
+                        <span className="flex items-center gap-1.5 text-emerald-600/80 dark:text-emerald-500/80">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m9 12 2 2 4-4" /></svg>
                           Ready to install
                         </span>
                       )}
@@ -510,9 +510,10 @@ export default function Home() {
                     href={result.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-muted/50"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/50"
                   >
-                    View Source <LinkIcon className="w-3 h-3" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" /><path d="M9 18c-4.51 2-5-2-7-2" /></svg>
+                    View Source
                   </a>
                 )}
               </div>
@@ -539,15 +540,15 @@ export default function Home() {
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Install Command</label>
                     </div>
                     <div className="relative group">
-
-                      <div className="relative flex items-center gap-3 bg-black/5 dark:bg-black/40 border border-border/50 rounded-lg p-4 font-mono text-sm">
-                        <span className="text-primary/70 select-none">$</span>
-                        <span className="flex-1 overflow-x-auto scrollbar-hide selection:bg-primary/20 text-foreground/90">{result.command}</span>
+                      {/* Terminal-style command box with subtle depth */}
+                      <div className="relative flex items-center gap-3 bg-zinc-100/70 dark:bg-zinc-900/50 border border-zinc-200/60 dark:border-zinc-700/40 rounded-xl p-4 font-mono text-sm shadow-[inset_0_1px_1px_rgba(0,0,0,0.02)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">
+                        <span className="text-zinc-400 dark:text-zinc-500 select-none font-medium">$</span>
+                        <span className="flex-1 overflow-x-auto scrollbar-hide selection:bg-primary/20 text-zinc-700 dark:text-zinc-200">{result.command}</span>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={handleCopy}
-                          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-background/20"
+                          className="h-8 w-8 shrink-0 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50 rounded-lg transition-all"
                         >
                           {copied ? (
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500"><polyline points="20 6 9 17 4 12" /></svg>
@@ -602,11 +603,18 @@ export default function Home() {
 
             <div className="flex gap-3">
               {result.alreadyExists && result.contentChanged && (
-                <Button onClick={handleRegenerate}>
+                <Button
+                  onClick={handleRegenerate}
+                  className="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
+                >
                   Regenerate
                 </Button>
               )}
-              <Button variant="outline" onClick={handleReset}>
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                className="border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
                 Convert Another
               </Button>
             </div>
