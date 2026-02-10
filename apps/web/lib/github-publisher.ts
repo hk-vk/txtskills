@@ -69,6 +69,60 @@ async function skillExists(octokit: Octokit, skillName: string): Promise<boolean
 }
 
 /**
+ * Normalize a source URL for comparison.
+ * Strips protocol, www, trailing slashes, and path to compare base domains.
+ */
+function normalizeSourceUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    // Get hostname without www
+    let host = parsed.hostname.replace(/^www\./, '');
+    return host.toLowerCase();
+  } catch {
+    return (url || '').toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+  }
+}
+
+/**
+ * Check if two sources are the same (same base domain).
+ */
+export function isSameSource(sourceUrl1: string | null | undefined, sourceUrl2: string | null | undefined): boolean {
+  const norm1 = normalizeSourceUrl(sourceUrl1);
+  const norm2 = normalizeSourceUrl(sourceUrl2);
+  // If both are empty, they're the same (both pasted content)
+  if (!norm1 && !norm2) return true;
+  // If one is empty and other is not, they're different
+  if (!norm1 || !norm2) return false;
+  return norm1 === norm2;
+}
+
+/**
+ * Find the next available skill name variant.
+ * If "skill-name" exists from a different source, tries "skill-name-1", "skill-name-2", etc.
+ */
+export async function findAvailableVariantName(baseName: string, maxAttempts = 10): Promise<string> {
+  const octokit = await getOctokit();
+
+  // Check if base name is available
+  if (!(await skillExists(octokit, baseName))) {
+    return baseName;
+  }
+
+  // Try variants: skill-name-1, skill-name-2, etc.
+  for (let i = 1; i <= maxAttempts; i++) {
+    const variantName = `${baseName}-${i}`;
+    if (!(await skillExists(octokit, variantName))) {
+      return variantName;
+    }
+  }
+
+  // Fallback: add timestamp
+  const timestamp = Date.now().toString(36);
+  return `${baseName}-${timestamp}`;
+}
+
+/**
  * List all skills in the repo using Git Trees API (single API call).
  * This is MUCH faster than the old N+1 approach.
  * 

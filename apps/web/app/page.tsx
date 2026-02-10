@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { invalidateSkillsCache } from "@/hooks/use-skills-cache";
+import { invalidateSkillsCache, useSkillsCache } from "@/hooks/use-skills-cache";
 import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@txtskills/ui/icons/agent-icons";
 import { Button } from "@txtskills/ui/button";
 import { Input } from "@txtskills/ui/input";
@@ -68,6 +68,7 @@ interface ConversionResult {
   alreadyExists?: boolean;
   contentChanged?: boolean;
   publishFailed?: boolean;
+  originalRequestedName?: string; // Set when name was changed due to conflict from different source
   existingMetadata?: {
     skillName: string;
     sourceUrl: string | null;
@@ -95,6 +96,12 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [customName, setCustomName] = useState("");
+
+  // Fetch existing skills to check for duplicate names
+  const { skills: existingSkills } = useSkillsCache();
+  const isDuplicateName = customName.trim() && existingSkills.some(
+    (s) => s.name.toLowerCase() === customName.trim().toLowerCase()
+  );
 
   const steps = ["Fetching", "Parsing", "Generating", "Publishing"];
 
@@ -141,7 +148,7 @@ export default function Home() {
       if (!data.publishFailed && !data.alreadyExists) {
         invalidateSkillsCache();
         // Update skills.json manifest in a separate request (fire-and-forget)
-        fetch('/api/skills/manifest', { method: 'POST' }).catch(() => {});
+        fetch('/api/skills/manifest', { method: 'POST' }).catch(() => { });
       }
       // Auto-expand preview when publish failed (no install command available)
       if (data.publishFailed) {
@@ -307,6 +314,9 @@ export default function Home() {
                       {customNameError && (
                         <p className="text-[11px] text-red-400/50 mt-1 ml-6">{customNameError}</p>
                       )}
+                      {!customNameError && isDuplicateName && (
+                        <p className="text-[11px] text-amber-400/60 mt-1 ml-6">This name exists — will update if same source, or rename if different</p>
+                      )}
                     </div>
                   </div>
                   {!url.trim() && (
@@ -346,7 +356,10 @@ export default function Home() {
                       {customNameError && (
                         <p className="text-[11px] text-red-400/50 mb-3 ml-6">{customNameError}</p>
                       )}
-                      {!customNameError && <div className="mb-3" />}
+                      {!customNameError && isDuplicateName && (
+                        <p className="text-[11px] text-amber-400/60 mb-3 ml-6">This name exists — will update if same source, or rename if different</p>
+                      )}
+                      {!customNameError && !isDuplicateName && <div className="mb-3" />}
                     </div>
                   </div>
                   <Button
@@ -510,6 +523,13 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
                     Publishing to GitHub failed. You can still copy the generated skill below.
+                  </div>
+                )}
+
+                {result.originalRequestedName && (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" x2="12" y1="9" y2="13" /><line x1="12" x2="12.01" y1="17" y2="17" /></svg>
+                    Name &ldquo;{result.originalRequestedName}&rdquo; was already taken by a different source, so we published as &ldquo;{result.skillName}&rdquo; instead.
                   </div>
                 )}
 

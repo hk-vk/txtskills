@@ -45,7 +45,8 @@ export interface ConversionResult {
   contentChanged?: boolean;
   existingMetadata?: PublishMetadata | null;
   publishFailed?: boolean;
-  zipData?: string; 
+  zipData?: string;
+  originalRequestedName?: string; // Set when name was changed due to conflict from different source
   error?: ConversionError;
 }
 

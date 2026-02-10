@@ -7,21 +7,26 @@ export async function fetchLlmsTxt(urlInput: string): Promise<string> {
   if (!targetUrl.startsWith('http')) {
     targetUrl = `https://${targetUrl}`;
   }
-  
+
   if (targetUrl.endsWith('/')) {
     targetUrl = targetUrl.slice(0, -1);
   }
 
-  const baseUrl = targetUrl.endsWith('llms.txt')
-    ? targetUrl.replace(/\/?\.?well-known\/llms\.txt$|\/llms\.txt$/, '')
+  const isExplicitUrl = targetUrl.endsWith('llms.txt') || targetUrl.endsWith('llms-full.txt');
+  const baseUrl = isExplicitUrl
+    ? targetUrl.replace(/\/?\.?well-known\/(llms|llms-full)\.txt$|\/(llms|llms-full)\.txt$/, '')
     : targetUrl;
 
-  const variations = [
-    targetUrl.endsWith('llms.txt') ? targetUrl : `${baseUrl}/llms.txt`,
-    `${baseUrl}/llms.txt`,
-    `${baseUrl}/.well-known/llms.txt`,
-    targetUrl
-  ];
+  // If user provided explicit URL (llms.txt or llms-full.txt), only try that
+  // Otherwise, default to llms.txt variations
+  const variations = isExplicitUrl
+    ? [targetUrl] // User explicitly provided the file URL
+    : [
+      // Default: try llms.txt variations
+      `${baseUrl}/llms.txt`,
+      `${baseUrl}/.well-known/llms.txt`,
+      targetUrl
+    ];
 
   const uniqueVariations = [...new Set(variations)];
 
@@ -49,5 +54,5 @@ export async function fetchLlmsTxt(urlInput: string): Promise<string> {
   }
 
   clearTimeout(id);
-  throw new Error('Could not fetch llms.txt from the provided URL.');
+  throw new Error('Could not fetch llms.txt or llms-full.txt from the provided URL.');
 }
