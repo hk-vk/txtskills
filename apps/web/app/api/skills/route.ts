@@ -56,16 +56,18 @@ export async function GET() {
         skills = await listAllSkills();
       }
     } catch (dbError) {
-      // D1 failed, fall back to GitHub API
-      console.warn('D1 query failed, falling back to GitHub:', dbError);
+      // D1 failed (expected in local dev), fall back to GitHub API
+      if (process.env.NODE_ENV === 'production') {
+        console.warn('D1 query failed, falling back to GitHub');
+      }
       skills = await listAllSkills();
     }
 
     const responseData = { skills };
-    
+
     // Update cache
     skillsCache = { data: responseData, timestamp: Date.now(), version: cacheVersion };
-    
+
     return NextResponse.json(
       { ...responseData, _v: cacheVersion },
       {
@@ -82,7 +84,7 @@ export async function GET() {
     console.error('List skills error:', error.message);
     return NextResponse.json(
       { skills: [], error: 'Failed to fetch skills.' },
-      { 
+      {
         status: 500,
         headers: {
           'Cache-Control': 'private, no-cache, no-store, must-revalidate',
