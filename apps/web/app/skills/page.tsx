@@ -5,11 +5,13 @@ import Link from "next/link";
 import { Spinner } from "@txtskills/ui/spinner";
 import { Input } from "@txtskills/ui/input";
 import { useSkillsCache } from "@/hooks/use-skills-cache";
+import { useInstallStats } from "@/hooks/use-install-stats";
 
 const SKILLS_PER_PAGE = 10;
 
 export default function SkillsPage() {
   const { skills, loading } = useSkillsCache();
+  const installStats = useInstallStats(); // Non-blocking, loads independently
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,9 +132,17 @@ export default function SkillsPage() {
               <div key={skill.name}>
                 <div className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                   <div className="min-w-0 flex-1">
-                    <span className="font-mono text-sm font-medium truncate block">
-                      {skill.name}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm font-medium truncate">
+                        {skill.name}
+                      </span>
+                      {installStats.get(skill.name) ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/70 tabular-nums shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                          {installStats.get(skill.name)!.toLocaleString()}
+                        </span>
+                      ) : null}
+                    </div>
                     {skill.metadata?.sourceUrl && (
                       <p className="text-xs text-muted-foreground truncate mt-0.5">
                         {skill.metadata.sourceUrl}

@@ -1,7 +1,7 @@
 {
     "name": "txtskills",
-    "version": "0.2.0",
-    "description": "Install individual skills from txtskills registry without cloning the entire repo",
+    "version": "0.2.1",
+    "description": "Install agent skills from the txtskills registry — llms.txt docs converted into portable skills for Claude Code, Cursor, Windsurf, Copilot, and more",
     "type": "module",
     "bin": {
         "txtskills": "dist/index.js"

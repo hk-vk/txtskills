@@ -1,6 +1,6 @@
 import os from "os";
 
-const ANALYTICS_ENDPOINT = "https://txtskills.com/api/analytics/install";
+const ANALYTICS_ENDPOINT = "https://txtskills.hari.works/api/analytics/install";
 
 interface AnalyticsPayload {
   skillName: string;

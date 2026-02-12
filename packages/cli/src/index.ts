@@ -11,7 +11,7 @@ const program = new Command();
 program
     .name("txtskills")
     .description("Install individual skills from txtskills registry")
-    .version("0.2.0")
+    .version("0.2.1")
     .hook("preAction", () => {
         showBanner();
         p.intro("txtskills");

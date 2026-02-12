@@ -228,7 +228,7 @@ export async function addCommand(
             child.on("close", (code) => {
                 if (code === 0) {
                     // Track successful installation (fire-and-forget)
-                    trackInstall(resolvedName, "0.2.0").catch(() => {});
+                    trackInstall(resolvedName, "0.2.1").catch(() => {});
                     resolve();
                 } else {
                     reject(new Error(`skills CLI exited with code ${code}`));
