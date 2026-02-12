@@ -1,10 +1,10 @@
 {
     "name": "txtskills",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Install individual skills from txtskills registry without cloning the entire repo",
     "type": "module",
     "bin": {
-        "txtskills": "./dist/index.js"
+        "txtskills": "dist/index.js"
     },
     "files": [
         "dist"

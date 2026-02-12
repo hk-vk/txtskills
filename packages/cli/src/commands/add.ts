@@ -12,6 +12,7 @@ import {
 } from "../github.js";
 import { DEFAULT_OWNER, DEFAULT_REPO, getGitHubToken } from "../config.js";
 import { formatSkillName, rateLimitWarning } from "../utils.js";
+import { trackInstall } from "../analytics.js";
 
 interface AddOptions {
     repo?: string;
@@ -226,6 +227,8 @@ export async function addCommand(
         await new Promise<void>((resolve, reject) => {
             child.on("close", (code) => {
                 if (code === 0) {
+                    // Track successful installation (fire-and-forget)
+                    trackInstall(resolvedName, "0.2.0").catch(() => {});
                     resolve();
                 } else {
                     reject(new Error(`skills CLI exited with code ${code}`));
