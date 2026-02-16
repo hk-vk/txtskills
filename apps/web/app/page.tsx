@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { invalidateSkillsCache, useSkillsCache } from "@/hooks/use-skills-cache";
 import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@txtskills/ui/icons/agent-icons";
@@ -202,6 +202,10 @@ export default function Home() {
   const customNameError = getCustomNameError(customName);
   const hasInput = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
   const isValid = hasInput && !customNameError;
+  const showPeerlistBadge = useMemo(() => {
+    const deadline = new Date("2026-02-22T00:00:00Z");
+    return new Date() < deadline;
+  }, []);
 
   return (
     <main className="min-h-screen bg-background">
@@ -209,21 +213,23 @@ export default function Home() {
 
         {/* Header */}
         <header className="mb-16 relative">
-          <div className="flex justify-center mb-8">
-            <a
-              href="https://peerlist.io/harikrishnanvk/project/txtskills--convert-llmstxt-to-agent-skills"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Peerlist project badge for txtskills"
-              className="rounded-2xl border border-border/40 bg-card/40 backdrop-blur-lg px-4 py-3 shadow-sm transition hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/70"
-            >
-              <img
-                src="https://peerlist.io/api/v1/projects/embed/PRJHP6L6L6ONDRGLQCQDJLANR7JJGA?showUpvote=true&theme=dark"
-                alt="txtskills - Convert llms.txt to Agent Skills"
-                style={{ width: "auto", height: "48px" }}
-              />
-            </a>
-          </div>
+          {showPeerlistBadge && (
+            <div className="flex justify-center mb-8">
+              <a
+                href="https://peerlist.io/harikrishnanvk/project/txtskills--convert-llmstxt-to-agent-skills"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Peerlist project badge for txtskills"
+                className="rounded-2xl border border-border/40 bg-card/40 backdrop-blur-lg px-4 py-3 shadow-sm transition hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/70"
+              >
+                <img
+                  src="https://peerlist.io/api/v1/projects/embed/PRJHP6L6L6ONDRGLQCQDJLANR7JJGA?showUpvote=true&theme=dark"
+                  alt="txtskills - Convert llms.txt to Agent Skills"
+                  style={{ width: "auto", height: "48px" }}
+                />
+              </a>
+            </div>
+          )}
           {/* Decorative background */}
           <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 opacity-[0.03]" style={{
