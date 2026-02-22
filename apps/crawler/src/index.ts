@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { DuckDBInstance } from "@duckdb/node-api";
 import initSqlJs from "sql.js";
 
@@ -43,16 +44,45 @@ interface LiveResult {
   checkedAt: string;
 }
 
+interface AutocompletePayload {
+  crawlId: string;
+  generatedAt: string;
+  totalHosts: number;
+  hosts: string[];
+}
+
 const config = {
   outputDir: process.env.OUTPUT_DIR || path.resolve(process.cwd(), "output"),
   crawlId: process.env.CC_CRAWL_ID,
-  maxFiles: Number(process.env.MAX_FILES || 5),
-  verifyLimit: Number(process.env.VERIFY_LIMIT || 200),
+  crawlIds: process.env.CC_CRAWL_IDS,
+  recentCollections: Number(process.env.RECENT_COLLECTIONS || 8),
+  maxFiles: Number(process.env.MAX_FILES || 200),
+  verifyLimit: Number(process.env.VERIFY_LIMIT || 0),
   verifyConcurrency: Number(process.env.VERIFY_CONCURRENCY || 12),
-  timeoutMs: Number(process.env.REQUEST_TIMEOUT_MS || 10000)
+  timeoutMs: Number(process.env.REQUEST_TIMEOUT_MS || 10000),
+  fileSelectionStrategy: process.env.FILE_SELECTION_STRATEGY || "spread",
+  artifactPrefix: process.env.ARTIFACT_PREFIX || "llms-index",
+  publishR2: process.env.PUBLISH_R2 === "true",
+  r2Endpoint: process.env.R2_ENDPOINT,
+  r2Bucket: process.env.R2_BUCKET,
+  r2AccessKeyId: process.env.R2_ACCESS_KEY_ID,
+  r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  r2PublicBaseUrl: process.env.R2_PUBLIC_BASE_URL
 };
 
-const normalizeUrl = (value: string) => value.trim().toLowerCase().replace(/\/$/, "");
+const normalizeUrl = (value: string) => {
+  const trimmed = value.trim().replace(/\s+/g, "");
+  if (!trimmed) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    const normalizedPath = parsed.pathname.replace(/\/$/, "");
+    return `${parsed.host.toLowerCase()}${normalizedPath}${parsed.search}`;
+  } catch {
+    return trimmed.toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
+};
+
+const normalizeHost = (value: string) => value.trim().toLowerCase().replace(/^www\./, "");
 
 async function getLatestCollection(): Promise<CollectionInfo> {
   const response = await fetch(COLLECTIONS_URL);
@@ -66,6 +96,22 @@ async function getLatestCollection(): Promise<CollectionInfo> {
   }
 
   return data[0] as CollectionInfo;
+}
+
+async function getRecentCollections(limit: number): Promise<CollectionInfo[]> {
+  const response = await fetch(COLLECTIONS_URL);
+  if (!response.ok) {
+    throw new Error(`Failed to load Common Crawl collections: ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid Common Crawl collection response.");
+  }
+
+  return data
+    .filter((entry) => entry?.id)
+    .slice(0, Math.max(1, limit)) as CollectionInfo[];
 }
 
 async function fetchIndexPaths(crawlId: string): Promise<string[]> {
@@ -82,6 +128,26 @@ async function fetchIndexPaths(crawlId: string): Promise<string[]> {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => `https://data.commoncrawl.org/${line}`);
+}
+
+function pickIndexPaths(indexPaths: string[], maxFiles: number, strategy: string): string[] {
+  if (maxFiles <= 0 || maxFiles >= indexPaths.length) {
+    return indexPaths;
+  }
+
+  if (strategy === "first") {
+    return indexPaths.slice(0, maxFiles);
+  }
+
+  const picked: string[] = [];
+  const last = indexPaths.length - 1;
+  for (let i = 0; i < maxFiles; i++) {
+    const ratio = maxFiles === 1 ? 0 : i / (maxFiles - 1);
+    const idx = Math.floor(ratio * last);
+    picked.push(indexPaths[idx]);
+  }
+
+  return Array.from(new Set(picked));
 }
 
 async function createDuckDbConnection() {
@@ -106,12 +172,15 @@ async function extractFromParquet(
       content_mime_type,
       content_mime_detected
     FROM read_parquet('${fileUrl}')
-    WHERE url_path IN (${pathList})
+    WHERE (
+      url_path IN (${pathList})
+      OR regexp_matches(lower(url), '/(?:\\.well-known/)?llms(?:-full)?\\.txt(?:\\?.*)?$')
+    )
       AND fetch_status = 200
   `;
 
   const reader = await connection.runAndReadAll(query);
-  const rows = reader.getRowObjectsJson() as CrawlRow[];
+  const rows = reader.getRowObjectsJson() as unknown as CrawlRow[];
   return rows.map((row) => ({
     url: row.url,
     host: row.url_host_registered_domain,
@@ -135,10 +204,21 @@ async function verifyUrls(urls: string[], timeoutMs: number, concurrency: number
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
-        const response = await fetch(target, { signal: controller.signal });
-        const contentType = response.headers.get("content-type") || "";
-        if (response.ok && !/text\/html|application\/xhtml\+xml/i.test(contentType)) {
-          results.push({ url: target, status: response.status, checkedAt: new Date().toISOString() });
+        const headResponse = await fetch(target, {
+          method: "HEAD",
+          redirect: "follow",
+          signal: controller.signal
+        });
+        let finalResponse = headResponse;
+        let contentType = headResponse.headers.get("content-type") || "";
+
+        if (!headResponse.ok || !contentType || /text\/html|application\/xhtml\+xml/i.test(contentType)) {
+          finalResponse = await fetch(target, { method: "GET", redirect: "follow", signal: controller.signal });
+          contentType = finalResponse.headers.get("content-type") || "";
+        }
+
+        if (finalResponse.ok && !/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+          results.push({ url: target, status: finalResponse.status, checkedAt: new Date().toISOString() });
         }
       } catch {
       } finally {
@@ -216,30 +296,116 @@ async function openDatabase(filePath: string) {
   return { db, insert, save };
 }
 
+async function uploadArtifactsToR2(
+  outputDir: string,
+  crawlId: string,
+  generatedAt: string
+) {
+  if (!config.publishR2) {
+    return;
+  }
+
+  if (!config.r2Bucket || !config.r2Endpoint || !config.r2AccessKeyId || !config.r2SecretAccessKey) {
+    throw new Error("R2 publishing enabled but required R2 env vars are missing.");
+  }
+
+  const client = new S3Client({
+    endpoint: config.r2Endpoint,
+    region: "auto",
+    credentials: {
+      accessKeyId: config.r2AccessKeyId,
+      secretAccessKey: config.r2SecretAccessKey
+    }
+  });
+
+  const files = [
+    "llms-index.sqlite",
+    "llms-index.jsonl",
+    "llms-index.meta.json",
+    "llms-autocomplete.json",
+    "latest.json"
+  ];
+  const timestamp = generatedAt.replace(/[:.]/g, "-");
+  const versionPrefix = `${config.artifactPrefix}/${crawlId}-${timestamp}`;
+  const latestPrefix = `${config.artifactPrefix}/latest`;
+
+  for (const fileName of files) {
+    const body = fs.readFileSync(path.join(outputDir, fileName));
+    await client.send(
+      new PutObjectCommand({
+        Bucket: config.r2Bucket,
+        Key: `${versionPrefix}/${fileName}`,
+        Body: body
+      })
+    );
+    await client.send(
+      new PutObjectCommand({
+        Bucket: config.r2Bucket,
+        Key: `${latestPrefix}/${fileName}`,
+        Body: body
+      })
+    );
+  }
+
+  if (config.r2PublicBaseUrl) {
+    const base = config.r2PublicBaseUrl.replace(/\/$/, "");
+    console.log(`Published latest manifest: ${base}/${latestPrefix}/latest.json`);
+  }
+}
+
 async function run() {
-  const latest = await getLatestCollection();
-  const crawlId = config.crawlId || latest.id;
   const outputDir = config.outputDir;
   const startedAt = new Date().toISOString();
 
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const indexPaths = await fetchIndexPaths(crawlId);
-  const limitedPaths = config.maxFiles > 0 ? indexPaths.slice(0, config.maxFiles) : indexPaths;
+  const recentCollections = await getRecentCollections(config.recentCollections);
+  const crawlIds = config.crawlIds
+    ? config.crawlIds.split(",").map((entry) => entry.trim()).filter(Boolean)
+    : config.crawlId
+      ? [config.crawlId]
+      : recentCollections.map((entry) => entry.id);
+  if (crawlIds.length === 0) {
+    throw new Error("No crawl IDs available.");
+  }
+  const activeCrawlId = crawlIds[0];
 
   const conn = await createDuckDbConnection();
   const results: CrawlResult[] = [];
   const seen = new Set<string>();
+  const collectionStats: Array<{ crawlId: string; selectedFiles: number; candidates: number; errors: number }> = [];
 
-  for (const fileUrl of limitedPaths) {
-    const rows = await extractFromParquet(conn, fileUrl);
-    for (const row of rows) {
-      const key = normalizeUrl(row.url);
-      if (!seen.has(key)) {
-        seen.add(key);
-        results.push(row);
+  for (const crawlId of crawlIds) {
+    console.log(`Scanning crawl ${crawlId}...`);
+    const indexPaths = await fetchIndexPaths(crawlId);
+    const limitedPaths = pickIndexPaths(indexPaths, config.maxFiles, config.fileSelectionStrategy);
+
+    let crawlCandidates = 0;
+    let crawlErrors = 0;
+    for (const fileUrl of limitedPaths) {
+      try {
+        const rows = await extractFromParquet(conn, fileUrl);
+        for (const row of rows) {
+          const key = normalizeUrl(row.url);
+          if (!seen.has(key)) {
+            seen.add(key);
+            results.push(row);
+            crawlCandidates++;
+          }
+        }
+      } catch {
+        crawlErrors++;
       }
     }
+    collectionStats.push({
+      crawlId,
+      selectedFiles: limitedPaths.length,
+      candidates: crawlCandidates,
+      errors: crawlErrors
+    });
+    console.log(
+      `Crawl ${crawlId}: scanned ${limitedPaths.length} files, candidates ${crawlCandidates}, errors ${crawlErrors}`
+    );
   }
 
   conn.closeSync();
@@ -248,6 +414,7 @@ async function run() {
   const limitedVerify = config.verifyLimit > 0 ? verifyTargets.slice(0, config.verifyLimit) : verifyTargets;
   const liveResults = await verifyUrls(limitedVerify, config.timeoutMs, config.verifyConcurrency);
   const liveMap = new Map(liveResults.map((entry) => [normalizeUrl(entry.url), entry]));
+  const verifiedEntries = results.filter((entry) => liveMap.has(normalizeUrl(entry.url)));
 
   const dbPath = path.join(outputDir, "llms-index.sqlite");
   const { db, insert, save } = await openDatabase(dbPath);
@@ -257,7 +424,7 @@ async function run() {
 
   const now = new Date().toISOString();
   db.exec("BEGIN");
-  for (const entry of results) {
+  for (const entry of verifiedEntries) {
     const live = liveMap.get(normalizeUrl(entry.url));
     const payload = {
       url: entry.url,
@@ -265,7 +432,7 @@ async function run() {
       path: entry.path,
       kind: entry.kind,
       source: "commoncrawl",
-      crawlId,
+      crawlId: activeCrawlId,
       fetchStatus: entry.fetchStatus ?? null,
       fetchTime: entry.fetchTime ?? null,
       contentType: entry.contentType ?? null,
@@ -279,7 +446,7 @@ async function run() {
       entry.path,
       entry.kind,
       "commoncrawl",
-      crawlId,
+      activeCrawlId,
       entry.fetchStatus ?? null,
       entry.fetchTime ?? null,
       entry.contentType ?? null,
@@ -294,19 +461,58 @@ async function run() {
   jsonlStream.end();
   save();
 
+  const autocompleteHosts = Array.from(
+    new Set(verifiedEntries.map((entry) => normalizeHost(entry.host)).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+  const autocompletePayload: AutocompletePayload = {
+    crawlId: activeCrawlId,
+    generatedAt: now,
+    totalHosts: autocompleteHosts.length,
+    hosts: autocompleteHosts
+  };
+  fs.writeFileSync(
+    path.join(outputDir, "llms-autocomplete.json"),
+    JSON.stringify(autocompletePayload)
+  );
+  fs.writeFileSync(
+    path.join(outputDir, "latest.json"),
+    JSON.stringify({
+      crawlId: activeCrawlId,
+      generatedAt: now,
+      files: [
+        "llms-index.sqlite",
+        "llms-index.jsonl",
+        "llms-index.meta.json",
+        "llms-autocomplete.json"
+      ],
+      prefix: config.artifactPrefix
+    })
+  );
+
   const finishedAt = new Date().toISOString();
   const metaPath = path.join(outputDir, "llms-index.meta.json");
+  const totalSelectedFiles = collectionStats.reduce((sum, stat) => sum + stat.selectedFiles, 0);
   fs.writeFileSync(metaPath, JSON.stringify({
-    crawlId,
+    crawlId: activeCrawlId,
+    crawlsScanned: crawlIds,
+    collectionStats,
     totalCandidates: results.length,
     liveVerified: liveResults.length,
+    persistedRecords: verifiedEntries.length,
+    verifyCoverage: verifyTargets.length === 0 ? 0 : Number((liveResults.length / verifyTargets.length).toFixed(4)),
     startedAt,
     finishedAt,
     maxFiles: config.maxFiles,
+    selectedFiles: totalSelectedFiles,
+    selectionStrategy: config.fileSelectionStrategy,
     verifyLimit: config.verifyLimit
   }, null, 2));
 
-  console.log(`Crawl complete. Candidates: ${results.length}, live verified: ${liveResults.length}`);
+  await uploadArtifactsToR2(outputDir, activeCrawlId, now);
+
+  console.log(
+    `Crawl complete. Candidates: ${results.length}, live verified: ${liveResults.length}, persisted: ${verifiedEntries.length}`
+  );
   console.log(`Outputs: ${dbPath}, ${jsonlPath}`);
 }
 

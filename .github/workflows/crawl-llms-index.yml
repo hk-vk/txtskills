@@ -1,0 +1,54 @@
+name: Build llms index
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and run crawler
+        env:
+          MAX_FILES: ${{ vars.LLMS_MAX_FILES || '500' }}
+          RECENT_COLLECTIONS: ${{ vars.LLMS_RECENT_COLLECTIONS || '8' }}
+          VERIFY_LIMIT: ${{ vars.LLMS_VERIFY_LIMIT || '0' }}
+          VERIFY_CONCURRENCY: ${{ vars.LLMS_VERIFY_CONCURRENCY || '24' }}
+          REQUEST_TIMEOUT_MS: ${{ vars.LLMS_REQUEST_TIMEOUT_MS || '10000' }}
+          FILE_SELECTION_STRATEGY: ${{ vars.LLMS_FILE_SELECTION_STRATEGY || 'spread' }}
+          PUBLISH_R2: ${{ secrets.R2_PUBLISH_ENABLED || 'false' }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
+          ARTIFACT_PREFIX: ${{ vars.LLMS_ARTIFACT_PREFIX || 'llms-index' }}
+        run: pnpm --filter @txtskills/crawler dev
+
+      - name: Upload crawler outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: llms-index-output
+          path: apps/crawler/output
+          if-no-files-found: warn

@@ -10,11 +10,13 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.995.0",
     "@duckdb/node-api": "^1.4.4-r.1",
     "sql.js": "^1.13.0"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/sql.js": "^1.4.9",
     "tsx": "^4.19.4",
     "typescript": "^5.9.2"
   }

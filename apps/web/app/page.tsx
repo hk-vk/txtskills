@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { invalidateSkillsCache, useSkillsCache } from "@/hooks/use-skills-cache";
 import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@txtskills/ui/icons/agent-icons";
@@ -85,6 +85,11 @@ interface ConversionError {
   suggestion?: string;
 }
 
+interface UrlSuggestion {
+  host: string;
+  url: string;
+}
+
 export default function Home() {
   const [state, setState] = useState<AppState>("input");
   const [url, setUrl] = useState("");
@@ -96,6 +101,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [customName, setCustomName] = useState("");
+  const [urlSuggestions, setUrlSuggestions] = useState<UrlSuggestion[]>([]);
 
   // Fetch existing skills to check for duplicate names
   const { skills: existingSkills } = useSkillsCache();
@@ -207,6 +213,36 @@ export default function Home() {
     return new Date() < deadline;
   }, []);
 
+  useEffect(() => {
+    if (activeTab !== "url") return;
+    const value = url.trim();
+    if (value.length < 2) {
+      setUrlSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/llms/autocomplete?q=${encodeURIComponent(value)}&limit=8`, {
+          signal: controller.signal,
+          cache: "no-store"
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data.suggestions)) {
+          setUrlSuggestions(data.suggestions);
+        }
+      } catch {
+      }
+    }, 140);
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [url, activeTab]);
+
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-6 py-10 md:py-20">
@@ -300,10 +336,16 @@ export default function Home() {
                         placeholder="https://docs.example.com"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
+                        list="llms-source-suggestions"
                         className="pl-11 font-mono h-12 w-full bg-card border-border"
                         autoComplete="off"
                         spellCheck="false"
                       />
+                      <datalist id="llms-source-suggestions">
+                        {urlSuggestions.map((suggestion) => (
+                          <option key={suggestion.host} value={suggestion.url} />
+                        ))}
+                      </datalist>
                     </div>
                     <Button
                       onClick={() => handleSubmit()}
