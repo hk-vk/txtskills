@@ -1,6 +1,6 @@
 {
     "name": "txtskills",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Install agent skills from the txtskills registry — llms.txt docs converted into portable skills for Claude Code, Cursor, Windsurf, Copilot, and more",
     "type": "module",
     "bin": {
@@ -16,10 +16,10 @@
         "clean": "rm -rf dist .turbo node_modules"
     },
     "dependencies": {
-        "@clack/prompts": "^0.11.0",
-        "commander": "^13.1.0",
+        "@clack/prompts": "^1.0.1",
+        "commander": "^14.0.3",
         "picocolors": "^1.1.1",
-        "skills": "latest"
+        "skills": "^1.4.1"
     },
     "devDependencies": {
         "@types/node": "^22",
@@ -27,6 +27,6 @@
         "typescript": "^5"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=20"
     }
 }
