@@ -1,4 +1,7 @@
 import pc from "picocolors";
+import { createRequire } from "node:module";
+import { resolve, dirname } from "node:path";
+import { VERSION } from "./config.js";
 
 // txtskills ASCII banner — graffiti style
 const LOGO_LINES = [
@@ -27,7 +30,7 @@ export function showBanner(): void {
         console.log(`${GRAYS[i]}${line}${RESET}`);
     });
     console.log(
-        `${pc.dim("llms.txt → agent skills")}  ${pc.dim("·")}  ${pc.dim("v0.1.0")}`
+        `${pc.dim("llms.txt → agent skills")}  ${pc.dim("·")}  ${pc.dim(`v${VERSION}`)}`
     );
     console.log();
 }
@@ -69,4 +72,13 @@ export function rateLimitWarning(remaining: number, limit: number): string | nul
     return pc.yellow(
         `GitHub API rate limit: ${remaining}/${limit} remaining. Set GITHUB_TOKEN for higher limits.`
     );
+}
+
+/**
+ * Resolve the path to the locally installed `skills` CLI binary.
+ */
+export function getSkillsBinPath(): string {
+    const require = createRequire(import.meta.url);
+    const skillsPkg = require.resolve("skills/package.json");
+    return resolve(dirname(skillsPkg), "bin", "cli.mjs");
 }

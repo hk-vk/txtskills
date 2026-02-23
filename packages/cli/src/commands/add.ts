@@ -1,8 +1,6 @@
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { execSync, spawn } from "child_process";
-import { createRequire } from "module";
-import { resolve, dirname } from "path";
+import { spawn } from "child_process";
 import {
     downloadSkillFolder,
     cleanupTempDir,
@@ -10,8 +8,8 @@ import {
     fetchManifest,
     listSkillDirs,
 } from "../github.js";
-import { DEFAULT_OWNER, DEFAULT_REPO, getGitHubToken } from "../config.js";
-import { formatSkillName, rateLimitWarning } from "../utils.js";
+import { DEFAULT_OWNER, DEFAULT_REPO } from "../config.js";
+import { formatSkillName, rateLimitWarning, getSkillsBinPath } from "../utils.js";
 import { trackInstall } from "../analytics.js";
 
 interface AddOptions {
@@ -136,15 +134,6 @@ async function resolveSkillName(
     return selected as string;
 }
 
-/**
- * Resolve the path to the locally installed `skills` CLI binary.
- */
-function getSkillsBinPath(): string {
-    const require = createRequire(import.meta.url);
-    const skillsPkg = require.resolve("skills/package.json");
-    return resolve(dirname(skillsPkg), "bin", "cli.mjs");
-}
-
 export async function addCommand(
     skillName: string | undefined,
     options: AddOptions
@@ -228,7 +217,7 @@ export async function addCommand(
             child.on("close", (code) => {
                 if (code === 0) {
                     // Track successful installation (fire-and-forget)
-                    trackInstall(resolvedName, "0.2.1").catch(() => {});
+                    trackInstall(resolvedName).catch(() => {});
                     resolve();
                 } else {
                     reject(new Error(`skills CLI exited with code ${code}`));

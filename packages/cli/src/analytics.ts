@@ -1,4 +1,5 @@
 import os from "os";
+import { VERSION } from "./config.js";
 
 const ANALYTICS_ENDPOINT = "https://txtskills.hari.works/api/analytics/install";
 
@@ -15,7 +16,7 @@ interface AnalyticsPayload {
  */
 export async function trackInstall(
   skillName: string,
-  version: string = "0.1.0"
+  version: string = VERSION
 ): Promise<void> {
   try {
     const payload: AnalyticsPayload = {

@@ -5,13 +5,14 @@ import { addCommand } from "./commands/add.js";
 import { listCommand } from "./commands/list.js";
 import { searchCommand } from "./commands/search.js";
 import { removeCommand } from "./commands/remove.js";
+import { VERSION } from "./config.js";
 
 const program = new Command();
 
 program
     .name("txtskills")
     .description("Install individual skills from txtskills registry")
-    .version("0.2.2")
+    .version(VERSION)
     .hook("preAction", () => {
         showBanner();
         p.intro("txtskills");

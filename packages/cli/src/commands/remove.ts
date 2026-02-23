@@ -1,13 +1,6 @@
 import { execSync } from "node:child_process";
-import { createRequire } from "node:module";
-import { resolve, dirname } from "node:path";
 import * as p from "@clack/prompts";
-
-function getSkillsBinPath(): string {
-    const require = createRequire(import.meta.url);
-    const skillsPkg = require.resolve("skills/package.json");
-    return resolve(dirname(skillsPkg), "bin", "cli.mjs");
-}
+import { getSkillsBinPath } from "../utils.js";
 
 interface RemoveOptions {
     global?: boolean;
