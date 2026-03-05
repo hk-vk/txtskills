@@ -14,27 +14,6 @@ import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@txtskills/ui
 import { ScrollArea } from "@txtskills/ui/scroll-area";
 import { Alert, AlertDescription } from "@txtskills/ui/alert";
 
-// URL/Link icon SVG
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-}
-
 // Globe icon for URL
 function GlobeIcon({ className }: { className?: string }) {
   return (
@@ -53,6 +32,21 @@ function GlobeIcon({ className }: { className?: string }) {
       <circle cx="12" cy="12" r="10" />
       <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
       <path d="M2 12h20" />
+    </svg>
+  );
+}
+
+function GitHubIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
     </svg>
   );
 }
@@ -209,10 +203,32 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-10 md:py-20">
+      <div className="max-w-4xl mx-auto px-5 py-8 md:px-6 md:py-16">
 
         {/* Header */}
         <header className="mb-16 relative">
+          <div className="mb-8 flex items-center justify-end">
+            <nav
+              aria-label="Primary"
+              className="inline-flex items-center gap-5 border border-border/40 bg-card/50 px-4 py-2 text-xs backdrop-blur-sm sm:text-sm"
+            >
+              <Link
+                href="/skills"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                View all skills
+              </Link>
+              <a
+                href="https://github.com/hk-vk/txtskills"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <GitHubIcon className="size-3" />
+                Star on GitHub
+              </a>
+            </nav>
+          </div>
           {showPeerlistBadge && (
             <div className="flex justify-center mb-8">
               <a
@@ -243,7 +259,7 @@ export default function Home() {
           <div className="text-center md:text-left">
             <div className="inline-block relative">
               <h1
-                className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
+                className="text-balance text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
                 style={{ fontFamily: "'Doto', sans-serif" }}
                 itemProp="name"
               >
@@ -267,7 +283,7 @@ export default function Home() {
               llms.txt → agent skills
             </p>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-6 leading-relaxed mx-auto md:mx-0">
+            <p className="text-pretty text-lg md:text-xl text-muted-foreground max-w-xl mt-6 leading-relaxed mx-auto md:mx-0">
               Convert any <a href="https://llmstxt.org/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity"><code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono border border-border/50">llms.txt</code></a> documentation into an installable <a href="https://agentskills.io/home" target="_blank" rel="noopener noreferrer" className="text-foreground border-b border-border hover:border-foreground transition-colors pb-0.5">skill</a> for AI agents.
             </p>
           </div>
@@ -279,8 +295,8 @@ export default function Home() {
 
         {/* Input State */}
         {state === "input" && (
-          <div className="space-y-12">
-            <section>
+          <div className="space-y-10">
+            <section className="rounded-2xl border border-border/50 bg-card/40 p-4 shadow-sm transition-colors hover:border-border/70 sm:p-6">
               <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
                 Enter Source
               </h2>
@@ -308,7 +324,7 @@ export default function Home() {
                     <Button
                       onClick={() => handleSubmit()}
                       disabled={!isValid}
-                      className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
+                      className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-colors bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
                     >
                       Convert
                       <span className="text-zinc-400 dark:text-zinc-500 text-xs">→</span>
@@ -340,13 +356,6 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                  {!url.trim() && (
-                    <div className="mt-3 px-1">
-                      <p className="text-xs text-muted-foreground/60">
-                        Paste a base URL or a direct llms.txt link.
-                      </p>
-                    </div>
-                  )}
                 </TabsPanel>
 
                 <TabsPanel value="paste">
@@ -386,7 +395,7 @@ export default function Home() {
                   <Button
                     onClick={() => handleSubmit()}
                     disabled={!isValid}
-                    className="h-12 px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-all bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
+                    className="h-12 w-full sm:w-auto px-6 font-mono tracking-wide text-sm gap-2.5 shadow-none hover:shadow-none transition-colors bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900"
                   >
                     Convert
                     <span className="text-zinc-400 dark:text-zinc-500 text-xs">→</span>
@@ -394,55 +403,45 @@ export default function Home() {
                 </TabsPanel>
               </Tabs>
 
-              {/* Browse Skills Link */}
-              <div className="mt-12 mb-8">
-                <Link
-                  href="/skills"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 w-fit"
-                >
-                  Browse all skills
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                </Link>
-              </div>
+            </section>
 
-              {/* Works With - Agent Compatibility */}
-              <div className="space-y-4">
-                <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold opacity-70">Compatible with</span>
-                <div className="flex flex-wrap items-center gap-3">
-                  {/* Claude Code */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
-                    <ClaudeIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Claude Code</span>
-                  </div>
-                  {/* Cursor */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
-                    <CursorIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Cursor</span>
-                  </div>
-                  {/* Windsurf */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
-                    <WindsurfIcon className="w-4 h-4 text-teal-400 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Windsurf</span>
-                  </div>
-                  {/* GitHub Copilot */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
-                    <CopilotIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Copilot</span>
-                  </div>
-                  {/* Amp */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
-                    <AmpIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Amp</span>
-                  </div>
-                  {/* Antigravity */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-primary/20 hover:bg-muted/50 transition-all cursor-default group">
-                    <AntigravityIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Antigravity</span>
-                  </div>
-                  {/* More */}
-                  <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 border border-transparent select-none">
-                    <span className="text-xs font-medium">+ more</span>
-                  </div>
+            {/* Works With - Agent Compatibility */}
+            <section className="space-y-4">
+              <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold opacity-70">Works with</span>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Claude Code */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-border/70 hover:bg-muted/50 transition-colors cursor-default group">
+                  <ClaudeIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Claude Code</span>
+                </div>
+                {/* Cursor */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-border/70 hover:bg-muted/50 transition-colors cursor-default group">
+                  <CursorIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Cursor</span>
+                </div>
+                {/* Windsurf */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-border/70 hover:bg-muted/50 transition-colors cursor-default group">
+                  <WindsurfIcon className="w-4 h-4 text-teal-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Windsurf</span>
+                </div>
+                {/* GitHub Copilot */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-border/70 hover:bg-muted/50 transition-colors cursor-default group">
+                  <CopilotIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Copilot</span>
+                </div>
+                {/* Amp */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-border/70 hover:bg-muted/50 transition-colors cursor-default group">
+                  <AmpIcon className="w-4 h-4 text-foreground group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Amp</span>
+                </div>
+                {/* Antigravity */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/40 hover:border-border/70 hover:bg-muted/50 transition-colors cursor-default group">
+                  <AntigravityIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Antigravity</span>
+                </div>
+                {/* More */}
+                <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 border border-transparent select-none">
+                  <span className="text-xs font-medium">+ more</span>
                 </div>
               </div>
             </section>
@@ -451,13 +450,13 @@ export default function Home() {
 
         {/* Loading State */}
         {state === "loading" && (
-          <div className="space-y-8">
+          <div className="space-y-8 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6">
             <div className="flex items-center gap-4">
               <Spinner className="h-5 w-5" />
               <span className="text-lg">{steps[loadingStep]}...</span>
             </div>
             <Progress value={((loadingStep + 1) / steps.length) * 100} className="h-1" />
-            <div className="flex gap-6 text-sm">
+            <div className="flex flex-wrap gap-4 text-sm">
               {steps.map((step, i) => (
                 <span
                   key={step}
@@ -644,7 +643,7 @@ export default function Home() {
 
         {/* Error State */}
         {state === "error" && error && (
-          <div className="space-y-6">
+          <div className="space-y-6 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6">
             <Alert variant="error">
               <AlertDescription>
                 <p className="font-medium">{error.message}</p>
@@ -665,7 +664,7 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <footer className="mt-24 pt-8 border-t border-border flex items-center justify-between">
+        <footer className="mt-24 flex flex-col items-center justify-between gap-3 border-t border-border pt-8 sm:flex-row">
           <p className="text-sm text-muted-foreground">
             Built for the{" "}
             <a
@@ -678,18 +677,6 @@ export default function Home() {
             </a>
             {" "}ecosystem
           </p>
-          <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-            Star on
-            <a
-              href="https://github.com/hk-vk/txtskills"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 font-medium rounded-md border border-border bg-card text-foreground hover:bg-muted/50 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
-              GitHub
-            </a>
-          </span>
         </footer>
       </div>
     </main>
