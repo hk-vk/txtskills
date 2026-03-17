@@ -13,6 +13,7 @@ import { Spinner } from "@txtskills/ui/spinner";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@txtskills/ui/collapsible";
 import { ScrollArea } from "@txtskills/ui/scroll-area";
 import { Alert, AlertDescription } from "@txtskills/ui/alert";
+import { UsageModeNav } from "@/components/usage-mode-nav";
 
 // Globe icon for URL
 function GlobeIcon({ className }: { className?: string }) {
@@ -210,25 +211,30 @@ export default function Home() {
           <div className="mb-8 flex items-center justify-end">
             <nav
               aria-label="Primary"
-              className="inline-flex items-center gap-5 border border-border/40 bg-card/50 px-4 py-2 text-xs backdrop-blur-sm sm:text-sm"
+              className="inline-flex items-center gap-5 text-xs sm:text-sm"
             >
               <Link
                 href="/skills"
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/40"
               >
-                View all skills
+                Browse Skills
               </Link>
               <a
                 href="https://github.com/hk-vk/txtskills"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-1.5 text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/40"
               >
                 <GitHubIcon className="size-3" />
-                Star on GitHub
+                GitHub
               </a>
             </nav>
           </div>
+
+          <div className="mb-8 flex justify-center">
+            <UsageModeNav active="web" />
+          </div>
+
           {showPeerlistBadge && (
             <div className="flex justify-center mb-8">
               <a
