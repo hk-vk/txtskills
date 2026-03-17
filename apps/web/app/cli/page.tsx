@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { UsageModeNav } from "@/components/usage-mode-nav";
 import { CommandDocs } from "@/components/command-docs";
+import { TopLinksNav } from "@/components/top-links-nav";
 
 export default function CliPage() {
   return (
@@ -8,22 +8,7 @@ export default function CliPage() {
       <div className="max-w-4xl mx-auto px-5 py-8 md:px-6 md:py-16">
         <header className="mb-14">
           <div className="mb-8 flex items-center justify-end">
-            <nav aria-label="Primary" className="inline-flex items-center gap-5 text-xs sm:text-sm">
-              <Link
-                href="/skills"
-                className="text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/40"
-              >
-                Browse Skills
-              </Link>
-              <a
-                href="https://github.com/hk-vk/txtskills"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/40"
-              >
-                GitHub
-              </a>
-            </nav>
+            <TopLinksNav />
           </div>
 
           <div className="mb-8 flex justify-center">
