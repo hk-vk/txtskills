@@ -51,6 +51,18 @@ Or browse online at [txtskills.hari.works/skills](https://txtskills.hari.works/s
 npx txtskills search react
 ```
 
+## Convert docs URL to skill (directly from CLI)
+
+```bash
+npx txtskills convert github.com/llms.txt
+npx txtskills convert docs.anthropic.com
+npx txtskills convert docs.python.org --name python-docs
+npx txtskills convert docs.python.org --install
+npx txtskills convert docs.python.org --skip-install
+```
+
+By default, `convert` asks whether you want to install the generated skill immediately.
+
 ## Remove a skill
 
 ```bash
@@ -72,6 +84,17 @@ txtskills list                  List all available skills
 
 txtskills search [query]        Search for skills
   -r, --repo <owner/repo>       Use a different skill registry
+
+txtskills convert [url]         Convert docs URL/llms.txt to a skill
+  --api <url>                    Convert API base URL or full endpoint
+  -n, --name <skill-name>        Custom skill name
+  -f, --force                    Force regeneration if skill exists
+  --json                         Output conversion result as JSON
+  --install                      Auto-install after conversion
+  --skip-install                 Skip post-conversion install prompt
+  -g, --global                   Install globally when auto-installing
+  -a, --agent <agents...>        Target specific agents when auto-installing
+  -y, --yes                      Skip confirmation prompts where applicable
 
 txtskills remove [skills...]    Remove installed skills
   -g, --global                   Remove from global scope

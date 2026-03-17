@@ -5,6 +5,7 @@ import { addCommand } from "./commands/add.js";
 import { listCommand } from "./commands/list.js";
 import { searchCommand } from "./commands/search.js";
 import { removeCommand } from "./commands/remove.js";
+import { convertCommand } from "./commands/convert.js";
 import { VERSION } from "./config.js";
 
 const program = new Command();
@@ -68,6 +69,28 @@ program
     });
 
 program
+    .command("convert [url]")
+    .description("Convert a docs URL/llms.txt URL directly into a publishable skill")
+    .option("--api <url>", "Convert API base URL or full /api/convert endpoint")
+    .option("-n, --name <skill-name>", "Custom skill name (lowercase, hyphenated)")
+    .option("-f, --force", "Force regeneration if skill already exists")
+    .option("--json", "Output conversion result as JSON")
+    .option("--install", "Auto-install immediately after successful conversion")
+    .option("--skip-install", "Skip post-conversion install prompt")
+    .option("-g, --global", "Install globally if auto-installing")
+    .option("-a, --agent <agents...>", "Target specific agents when auto-installing")
+    .option("-y, --yes", "Skip confirmation prompts where applicable")
+    .action(async (url: string | undefined, options) => {
+        try {
+            await convertCommand(url, options);
+            p.outro("Done!");
+        } catch (err: any) {
+            p.log.error(err.message);
+            process.exit(1);
+        }
+    });
+
+program
     .command("remove [skills...]")
     .alias("rm")
     .description("Remove installed skills (wraps skills CLI remove)")
@@ -113,6 +136,11 @@ program.action(async () => {
                 hint: "Search for a specific skill",
             },
             {
+                value: "convert",
+                label: "Convert docs URL to skill",
+                hint: "Generate + publish a skill from a docs/llms URL",
+            },
+            {
                 value: "remove",
                 label: "Remove a skill",
                 hint: "Remove an installed skill from your agents",
@@ -134,6 +162,9 @@ program.action(async () => {
             break;
         case "search":
             await searchCommand(undefined, {});
+            break;
+        case "convert":
+            await convertCommand(undefined, {});
             break;
         case "remove":
             await removeCommand(undefined, {});
