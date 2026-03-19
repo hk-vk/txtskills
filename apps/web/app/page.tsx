@@ -72,6 +72,15 @@ function getErrorMessage(error: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
+const ASCII_PIXEL_FONT: Record<string, string[]> = {
+  t: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+  x: ["10001", "10001", "01010", "00100", "01010", "10001", "10001"],
+  s: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+  k: ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
+  i: ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
+  l: ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+};
+
 export default function Home() {
   const [state, setState] = useState<AppState>("input");
   const [url, setUrl] = useState("");
@@ -83,6 +92,8 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [customName, setCustomName] = useState("");
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [logoHoverX, setLogoHoverX] = useState<number | null>(null);
 
   // Fetch existing skills to check for duplicate names
   const { skills: existingSkills } = useSkillsCache();
@@ -189,6 +200,19 @@ export default function Home() {
   const customNameError = getCustomNameError(customName);
   const hasInput = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
   const isValid = hasInput && !customNameError;
+  const bitmapRows = Array.from({ length: 7 }, (_, row) =>
+    "txtskills"
+      .split("")
+      .map((char) => ASCII_PIXEL_FONT[char]?.[row] ?? "00000")
+      .join("0")
+  );
+  const bitmapCols = bitmapRows[0]?.length ?? 0;
+  const pixelSize = 8;
+  const pixelGap = 1;
+  const cell = pixelSize + pixelGap;
+  const viewBoxWidth = bitmapCols * cell - pixelGap;
+  const viewBoxHeight = bitmapRows.length * cell - pixelGap;
+  const isLogoLoading = state === "loading";
 
   return (
     <main className="relative min-h-screen bg-background">
@@ -217,25 +241,83 @@ export default function Home() {
           {/* Main title section */}
           <div className="text-center md:text-left">
             <div className="inline-block relative">
-              <h1
-                className="text-balance text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 bg-gradient-to-br from-foreground via-foreground to-muted-foreground/60 bg-clip-text"
-                style={{ fontFamily: "'Doto', sans-serif" }}
-                itemProp="name"
+              <h1 className="sr-only" itemProp="name">txtskills</h1>
+              <svg
+                aria-hidden="true"
+                viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+                className="mb-3 h-auto w-[280px] max-w-full sm:w-[340px] md:w-[480px] lg:w-[580px]"
+                role="img"
+                style={{ filter: "drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 8px 18px rgba(0,0,0,0.28))" }}
+                onPointerEnter={(e) => {
+                  setIsLogoHovered(true);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const normalizedX = ((e.clientX - rect.left) / rect.width) * viewBoxWidth;
+                  setLogoHoverX(normalizedX);
+                }}
+                onPointerMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const normalizedX = ((e.clientX - rect.left) / rect.width) * viewBoxWidth;
+                  setLogoHoverX(normalizedX);
+                }}
+                onPointerLeave={() => {
+                  setIsLogoHovered(false);
+                  setLogoHoverX(null);
+                }}
               >
-                txtskills
-              </h1>
-              {/* Pixelated underline effect */}
-              <div className="flex gap-1 justify-center md:justify-start h-2 opacity-50">
-                <div className="w-2 h-2 bg-foreground/10" />
-                <div className="w-2 h-2 bg-foreground/20" />
-                <div className="w-2 h-2 bg-foreground/40" />
-                <div className="w-2 h-2 bg-foreground/60" />
-                <div className="w-2 h-2 bg-foreground/80" />
-                <div className="w-2 h-2 bg-foreground/60" />
-                <div className="w-2 h-2 bg-foreground/40" />
-                <div className="w-2 h-2 bg-foreground/20" />
-                <div className="w-2 h-2 bg-foreground/10" />
-              </div>
+                <defs>
+                  <linearGradient id="logoToneGradient" x1="0" y1="0" x2={viewBoxWidth} y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="rgba(184, 184, 189, 0.74)" />
+                    <stop offset="14%" stopColor="rgba(232, 232, 236, 0.9)" />
+                    <stop offset="50%" stopColor="rgba(255, 255, 255, 0.98)" />
+                    <stop offset="86%" stopColor="rgba(232, 232, 236, 0.9)" />
+                    <stop offset="100%" stopColor="rgba(184, 184, 189, 0.74)" />
+                  </linearGradient>
+                  <linearGradient id="logoLoadingGradient" x1="0" y1="0" x2={viewBoxWidth} y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="rgba(170, 171, 178, 0.78)" />
+                    <stop offset="24%" stopColor="rgba(221, 225, 238, 0.92)" />
+                    <stop offset="50%" stopColor="rgba(244, 247, 255, 1)" />
+                    <stop offset="76%" stopColor="rgba(221, 225, 238, 0.92)" />
+                    <stop offset="100%" stopColor="rgba(170, 171, 178, 0.78)" />
+                  </linearGradient>
+                </defs>
+                {bitmapRows.map((row, rowIndex) =>
+                  row.split("").map((bit, colIndex) => {
+                    if (bit !== "1") return null;
+
+                    const pixelCenterX = colIndex * cell + pixelSize / 2;
+                    const hoverInfluence =
+                      !isLogoLoading && isLogoHovered && logoHoverX !== null
+                        ? Math.max(0, 1 - Math.abs(pixelCenterX - logoHoverX) / (cell * 6.5))
+                        : 0;
+                    const idleOpacity = Math.min(1, 0.76 + hoverInfluence * 0.28);
+
+                    return (
+                      <rect
+                        key={`${rowIndex}-${colIndex}`}
+                        x={colIndex * cell}
+                        y={rowIndex * cell}
+                        width={pixelSize}
+                        height={pixelSize}
+                        rx={0.8}
+                        fill={isLogoLoading ? "url(#logoLoadingGradient)" : "url(#logoToneGradient)"}
+                        data-logo-pixel="1"
+                        style={
+                          isLogoLoading
+                            ? {
+                                animation: "logoShimmer 1700ms cubic-bezier(0.22, 1, 0.36, 1) infinite",
+                                animationDelay: `${colIndex * 26}ms`,
+                                opacity: 0.58,
+                              }
+                            : {
+                                opacity: idleOpacity,
+                                transition: "opacity 120ms linear",
+                              }
+                        }
+                      />
+                    );
+                  })
+                )}
+              </svg>
             </div>
 
             <p className="text-muted-foreground tracking-[0.3em] text-xs uppercase mt-4 font-mono">
@@ -671,6 +753,25 @@ export default function Home() {
           </p>
         </footer>
       </div>
+
+      <style jsx>{`
+        @keyframes logoShimmer {
+          0%,
+          100% {
+            opacity: 0.5;
+          }
+          45% {
+            opacity: 0.96;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          [data-logo-pixel='1'] {
+            animation: none !important;
+            opacity: 0.82 !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
