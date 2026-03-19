@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -16,11 +19,22 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 export function TopLinksNav() {
+  const pathname = usePathname();
+  const isSkillsPage = pathname?.startsWith("/skills");
+
   return (
-    <nav aria-label="Primary" className="inline-flex items-center gap-5 text-xs sm:text-sm">
+    <nav
+      aria-label="Primary"
+      className="inline-flex items-center gap-1 rounded-lg border border-border/40 bg-background/50 p-1 text-xs sm:text-sm"
+    >
       <Link
         href="/skills"
-        className="text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/40"
+        aria-current={isSkillsPage ? "page" : undefined}
+        className={`rounded-md px-2.5 py-1.5 transition-colors ${
+          isSkillsPage
+            ? "bg-muted text-foreground"
+            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+        }`}
       >
         Browse Skills
       </Link>
@@ -28,10 +42,10 @@ export function TopLinksNav() {
         href="https://github.com/hk-vk/txtskills"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/40"
+        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
       >
         <GitHubIcon className="size-3.5" />
-        GitHub
+        Star on GitHub
       </a>
     </nav>
   );

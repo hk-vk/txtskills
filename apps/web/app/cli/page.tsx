@@ -6,7 +6,7 @@ export default function CliPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-5 py-8 md:px-6 md:py-16">
-        <header className="mb-14">
+        <header className="mb-14 ui-enter">
           <div className="mb-8 flex items-center justify-end">
             <TopLinksNav />
           </div>
@@ -21,7 +21,7 @@ export default function CliPage() {
           </p>
         </header>
 
-        <div className="space-y-10">
+        <div className="space-y-10 ui-enter-delayed">
           <CommandDocs
             title="Convert"
             entries={[

@@ -43,7 +43,7 @@ export default function SkillsPage() {
 
   return (
     <main className="min-h-dvh bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
+      <div className="max-w-4xl mx-auto px-6 py-16 md:py-24 ui-enter">
         <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">All Skills</h1>

@@ -220,7 +220,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto px-5 py-8 md:px-6 md:py-16">
 
         {/* Header */}
-        <header className="mb-16 relative">
+        <header className="mb-16 relative ui-enter">
           <div className="mb-8 flex items-center justify-end">
             <TopLinksNav />
           </div>
@@ -336,7 +336,7 @@ export default function Home() {
 
         {/* Input State */}
         {state === "input" && (
-          <div className="space-y-10">
+          <div className="space-y-10 ui-enter-delayed">
             <section className="rounded-2xl border border-border/50 bg-card/40 p-4 shadow-sm transition-colors hover:border-border/70 sm:p-6">
               <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
                 Enter Source
@@ -344,11 +344,11 @@ export default function Home() {
 
               <Tabs defaultValue="url" onValueChange={setActiveTab}>
                 <TabsList className="mb-4">
-                  <TabsTab value="url">URL</TabsTab>
-                  <TabsTab value="paste">Paste Content</TabsTab>
+                  <TabsTab value="url" className="transition-transform duration-150 active:scale-[0.97]">URL</TabsTab>
+                  <TabsTab value="paste" className="transition-transform duration-150 active:scale-[0.97]">Paste Content</TabsTab>
                 </TabsList>
 
-                <TabsPanel value="url">
+                <TabsPanel value="url" className="tab-panel-enter">
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="flex-1 relative">
                       <GlobeIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -415,7 +415,7 @@ export default function Home() {
                   </div>
                 </TabsPanel>
 
-                <TabsPanel value="paste">
+                <TabsPanel value="paste" className="tab-panel-enter">
                   <Textarea
                     placeholder="# Project Name&#10;> Description&#10;&#10;## Section&#10;- [Link](url): Notes"
                     value={content}
@@ -523,7 +523,7 @@ export default function Home() {
 
         {/* Loading State */}
         {state === "loading" && (
-          <div className="space-y-8 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6">
+          <div className="space-y-8 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6 ui-enter-delayed">
             <div className="flex items-center gap-4">
               <Spinner name="braille" className="h-5 w-5 text-lg" ariaLabel="Converting skill" />
               <span className="text-lg">{steps[loadingStep]}...</span>
@@ -544,7 +544,7 @@ export default function Home() {
 
         {/* Success State */}
         {state === "success" && result && (
-          <div className="space-y-12">
+          <div className="space-y-12 ui-enter-delayed">
             <button
               onClick={handleReset}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
@@ -717,7 +717,7 @@ export default function Home() {
 
         {/* Error State */}
         {state === "error" && error && (
-          <div className="space-y-6 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6">
+          <div className="space-y-6 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6 ui-enter-delayed">
             <Alert variant="error">
               <AlertDescription>
                 <p className="font-medium">{error.message}</p>
@@ -737,21 +737,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Footer */}
-        <footer className="mt-24 flex flex-col items-center justify-between gap-3 border-t border-border pt-8 sm:flex-row">
-          <p className="text-sm text-muted-foreground">
-            Built for the{" "}
-            <a
-              href="https://skills.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors inline-flex items-center gap-0.5"
-            >
-              <span className="text-xs">&#9650;</span>/<span>skills</span>
-            </a>
-            {" "}ecosystem
-          </p>
-        </footer>
       </div>
 
       <style jsx>{`
@@ -768,6 +753,7 @@ export default function Home() {
         @media (prefers-reduced-motion: reduce) {
           [data-logo-pixel='1'] {
             animation: none !important;
+            transition: none !important;
             opacity: 0.82 !important;
           }
         }
