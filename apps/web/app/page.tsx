@@ -525,7 +525,7 @@ export default function Home() {
         {state === "loading" && (
           <div className="space-y-8 rounded-2xl border border-border/50 bg-card/40 p-5 shadow-sm sm:p-6">
             <div className="flex items-center gap-4">
-              <Spinner className="h-5 w-5" />
+              <Spinner name="braille" className="h-5 w-5 text-lg" ariaLabel="Converting skill" />
               <span className="text-lg">{steps[loadingStep]}...</span>
             </div>
             <Progress value={((loadingStep + 1) / steps.length) * 100} className="h-1" />
