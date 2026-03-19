@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { invalidateSkillsCache, useSkillsCache } from "@/hooks/use-skills-cache";
 import { ClaudeIcon, AntigravityIcon, AmpIcon, CursorIcon, WindsurfIcon, CopilotIcon } from "@txtskills/ui/icons/agent-icons";
 import { Button } from "@txtskills/ui/button";
@@ -64,6 +63,13 @@ interface ConversionError {
   type: string;
   message: string;
   suggestion?: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Something went wrong. Please try again.";
 }
 
 export default function Home() {
@@ -136,10 +142,10 @@ export default function Home() {
         setPreviewOpen(true);
       }
       setState("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError({
         type: "api",
-        message: err.message || "Something went wrong. Please try again.",
+        message: getErrorMessage(err),
         suggestion: "Check your input and try again.",
       });
       setState("error");
@@ -183,13 +189,10 @@ export default function Home() {
   const customNameError = getCustomNameError(customName);
   const hasInput = activeTab === "url" ? url.trim().length > 0 : content.trim().length > 0;
   const isValid = hasInput && !customNameError;
-  const showPeerlistBadge = useMemo(() => {
-    const deadline = new Date("2026-02-22T00:00:00Z");
-    return new Date() < deadline;
-  }, []);
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="relative min-h-screen bg-background">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.14),transparent_55%)]" />
       <div className="max-w-4xl mx-auto px-5 py-8 md:px-6 md:py-16">
 
         {/* Header */}
@@ -202,23 +205,6 @@ export default function Home() {
             <UsageModeNav active="web" />
           </div>
 
-          {showPeerlistBadge && (
-            <div className="flex justify-center mb-8">
-              <a
-                href="https://peerlist.io/harikrishnanvk/project/txtskills--convert-llmstxt-to-agent-skills"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Peerlist project badge for txtskills"
-                className="rounded-2xl border border-border/40 bg-card/40 backdrop-blur-lg px-4 py-3 shadow-sm transition hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/70"
-              >
-                <img
-                  src="https://peerlist.io/api/v1/projects/embed/PRJHP6L6L6ONDRGLQCQDJLANR7JJGA?showUpvote=true&theme=dark"
-                  alt="txtskills - Convert llms.txt to Agent Skills"
-                  style={{ width: "auto", height: "48px" }}
-                />
-              </a>
-            </div>
-          )}
           {/* Decorative background */}
           <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -289,6 +275,14 @@ export default function Home() {
                         placeholder="https://docs.example.com"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (isValid) {
+                              handleSubmit();
+                            }
+                          }
+                        }}
                         className="pl-11 font-mono h-12 w-full bg-card border-border"
                         autoComplete="off"
                         spellCheck="false"
@@ -315,6 +309,14 @@ export default function Home() {
                             const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
                             setCustomName(sanitized);
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (isValid) {
+                                handleSubmit();
+                              }
+                            }
+                          }}
                           maxLength={64}
                           className={`font-mono h-9 text-xs max-w-[260px] bg-card text-muted-foreground focus:text-foreground ${customNameError ? 'border-red-400/30 focus-visible:ring-red-400/10' : 'border-border/50'}`}
                           autoComplete="off"
@@ -336,6 +338,14 @@ export default function Home() {
                     placeholder="# Project Name&#10;> Description&#10;&#10;## Section&#10;- [Link](url): Notes"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (isValid) {
+                          handleSubmit();
+                        }
+                      }
+                    }}
                     className="min-h-[200px] font-mono text-sm bg-card border-border mb-4"
                   />
                   <div className="grid transition-all duration-300 ease-in-out" style={{ gridTemplateRows: content.trim() ? '1fr' : '0fr' }}>
@@ -349,6 +359,14 @@ export default function Home() {
                           onChange={(e) => {
                             const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
                             setCustomName(sanitized);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (isValid) {
+                                handleSubmit();
+                              }
+                            }
                           }}
                           maxLength={64}
                           className={`font-mono h-9 text-xs max-w-[260px] bg-card text-muted-foreground focus:text-foreground ${customNameError ? 'border-red-400/30 focus-visible:ring-red-400/10' : 'border-border/50'}`}
@@ -541,6 +559,7 @@ export default function Home() {
                           variant="ghost"
                           size="icon"
                           onClick={handleCopy}
+                          aria-label={copied ? "Copied" : "Copy generated command"}
                           className="h-8 w-8 shrink-0 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50 rounded-lg transition-all"
                         >
                           {copied ? (
