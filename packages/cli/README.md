@@ -1,57 +1,95 @@
-# txtskills
+# txtskills CLI
 
-Install agent skills from the [txtskills](https://txtskills.hari.works) registry.
+A command-line interface for converting `llms.txt` documentation into installable agent skills and managing skills from the txtskills registry.
 
-## What are Agent Skills?
+The CLI also includes an interactive mode and is useful for scripting.
 
-A simple, open format for giving agents new capabilities and expertise.
+---
 
-Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently.
+## What is this?
 
-### Why Agent Skills?
+`txtskills` CLI can do three things:
 
-Agents are increasingly capable, but often don't have the context they need to do real work reliably. Skills solve this by giving agents access to procedural knowledge and company-, team-, and user-specific context they can load on demand. Agents with access to a set of skills can extend their capabilities based on the task they're working on.
+1. Convert docs into publishable skills.
+2. Install skills into your local/global AI agent setup.
+3. Discover, search, list, and remove registry skills.
 
-- **For skill authors:** Build capabilities once and deploy them across multiple agent products.
-- **For compatible agents:** Support for skills lets end users give agents new capabilities out of the box.
-- **For teams and enterprises:** Capture organizational knowledge in portable, version-controlled packages.
+It wraps the `skills` CLI for installs and removals, then adds discovery/conversion tooling tailored to txtskills.
 
-### What can Agent Skills enable?
+---
 
-- **Domain expertise:** Package specialized knowledge into reusable instructions, from legal review processes to data analysis pipelines.
-- **New capabilities:** Give agents new capabilities (e.g. creating presentations, building MCP servers, analyzing datasets).
-- **Repeatable workflows:** Turn multi-step tasks into consistent and auditable workflows.
-- **Interoperability:** Reuse the same skill across different agents and tools.
+## Quick start
 
-## Install a skill
+Run directly without install:
+
+```bash
+npx txtskills
+```
+
+That starts an interactive prompt when no command is provided.
+
+For a one-liner install:
 
 ```bash
 npx txtskills add <skill-name>
 ```
 
-For example:
+---
+
+## Commands
+
+### `txtskills add [skill-name]`
+
+Install a skill from the registry.
 
 ```bash
-npx txtskills add ai-sdk
 npx txtskills add next-js
-npx txtskills add tailwind-css
+npx txtskills add ai-sdk --global
+npx txtskills add tailwind-css -y
 ```
 
-## Browse available skills
+Options:
+
+- `-r, --repo <owner/repo>`: use a custom registry repo (default: `hk-vk/skills`)
+- `-g, --global`: install globally instead of project scope
+- `-a, --agent <agents...>`: target specific agents (e.g., `claude-code`, `cursor`)
+- `-y, --yes`: skip confirmation prompts
+
+If no skill name is provided, the CLI shows a searchable selector.
+
+### `txtskills list` (alias: `ls`)
+
+List available skills.
 
 ```bash
 npx txtskills list
+npx txtskills ls
+npx txtskills list --json
 ```
 
-Or browse online at [txtskills.hari.works/skills](https://txtskills.hari.works/skills).
+Options:
 
-## Search for a skill
+- `-r, --repo <owner/repo>`: use custom registry repo
+- `--json`: output JSON
+
+### `txtskills search [query]` (alias: `find`)
+
+Find skills by name/description, then choose one to install.
 
 ```bash
 npx txtskills search react
+npx txtskills find "llm"
 ```
 
-## Convert docs URL to skill (directly from CLI)
+Options:
+
+- `-r, --repo <owner/repo>`: use custom registry repo
+
+### `txtskills convert [url]`
+
+Convert a docs URL or `llms.txt` URL directly into a publishable skill.
+
+If URL is omitted, you are prompted for it.
 
 ```bash
 npx txtskills convert github.com/llms.txt
@@ -59,52 +97,75 @@ npx txtskills convert docs.anthropic.com
 npx txtskills convert docs.python.org --name python-docs
 npx txtskills convert docs.python.org --install
 npx txtskills convert docs.python.org --skip-install
+npx txtskills convert docs.python.org --json
+npx txtskills convert docs.python.org --api https://txtskills.hari.works
 ```
 
-By default, `convert` asks whether you want to install the generated skill immediately.
+Convert options:
 
-## Remove a skill
+- `--api <url>`: override API base URL (or pass full `/api/convert` endpoint)
+- `-n, --name <skill-name>`: set a custom skill name (lowercase + hyphens)
+- `-f, --force`: force regeneration if the skill already exists
+- `--json`: print full JSON response
+- `--install`: auto-install after successful conversion
+- `--skip-install`: skip the install prompt
+- `-g, --global`: install globally when using `--install`
+- `-a, --agent <agents...>`: target specific agents when auto-installing
+- `-y, --yes`: skip prompts where applicable
+
+Default behavior:
+
+- Tries common `llms.txt` URL variants from the input
+- Shows the resolved URL it used when it differs from your input
+- Prints generated install command when `--json` is not used
+- Prompts to install unless `--skip-install`
+- Publishes to GitHub unless that step fails (you can still install from output)
+
+### `txtskills remove [skills...]` (alias: `rm`)
+
+Remove installed skills (wrapped from `skills` CLI).
 
 ```bash
 npx txtskills remove <skill-name>
+npx txtskills rm <skill-name>
 ```
 
-## Options
+Options:
 
-```
-txtskills add [skill-name]     Install a skill
-  -r, --repo <owner/repo>       Use a different skill registry
-  -g, --global                   Install globally (all projects)
-  -a, --agent <agents...>        Target specific agents (e.g., claude-code, cursor)
-  -y, --yes                      Skip confirmation prompts
+- `-g, --global`: remove globally
+- `-a, --agent <agents...>`: remove only from selected agents (`*` allowed)
+- `-s, --skill <pattern>`: remove by pattern (`*` for all)
+- `-y, --yes`: skip confirmation prompts
+- `--all`: remove all skills from all agents
 
-txtskills list                  List all available skills
-  -r, --repo <owner/repo>       Use a different skill registry
-  --json                         Output as JSON
+Alias: `rm`
 
-txtskills search [query]        Search for skills
-  -r, --repo <owner/repo>       Use a different skill registry
+---
 
-txtskills convert [url]         Convert docs URL/llms.txt to a skill
-  --api <url>                    Convert API base URL or full endpoint
-  -n, --name <skill-name>        Custom skill name
-  -f, --force                    Force regeneration if skill exists
-  --json                         Output conversion result as JSON
-  --install                      Auto-install after conversion
-  --skip-install                 Skip post-conversion install prompt
-  -g, --global                   Install globally when auto-installing
-  -a, --agent <agents...>        Target specific agents when auto-installing
-  -y, --yes                      Skip confirmation prompts where applicable
+## Usage patterns
 
-txtskills remove [skills...]    Remove installed skills
-  -g, --global                   Remove from global scope
-  -a, --agent <agents...>        Remove from specific agents
-  -s, --skill <pattern>          Specify skills to remove (use '*' for all)
-  -y, --yes                      Skip confirmation prompts
-  --all                          Remove all skills from all agents
+### 1) Discover + install workflow
+
+```bash
+npx txtskills search docker
+npx txtskills add docker
 ```
 
-## Compatible agents
+### 2) Convert then install in one command
+
+```bash
+npx txtskills convert https://docs.example.com/llms.txt --install --global -y
+```
+
+### 3) Convert in scripts / automation
+
+```bash
+npx txtskills convert docs.example.com --json --skip-install > conversion.json
+```
+
+---
+
+## Compatibility
 
 - [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview)
 - [Cursor](https://cursor.com)
@@ -112,28 +173,21 @@ txtskills remove [skills...]    Remove installed skills
 - [GitHub Copilot](https://github.com/features/copilot)
 - [Amp](https://amp.dev)
 - [Antigravity](https://antigravity.dev)
-- Any agent that supports the [Agent Skills](https://agentskills.io) format
+- Any agent supporting the [Agent Skills](https://agentskills.io) format
 
-## How it works
-
-**[llms.txt](https://llmstxt.org/) → Agent Skills**
-
-1. Libraries publish documentation in the [llms.txt](https://llmstxt.org/) format — a simple standard for making docs accessible to language models.
-2. txtskills converts that documentation into agent skills — portable, structured folders that agents can load on demand.
-3. You install skills into your project, and your AI agent uses them for accurate, up-to-date context.
-
-## Create a skill
-
-Paste a URL or `llms.txt` content at [txtskills.hari.works](https://txtskills.hari.works) and get an installable skill in seconds.
+---
 
 ## Links
 
 - Website: [txtskills.hari.works](https://txtskills.hari.works)
+- Web app: [txtskills.hari.works](https://txtskills.hari.works)
 - Browse skills: [txtskills.hari.works/skills](https://txtskills.hari.works/skills)
 - GitHub: [github.com/hk-vk/txtskills](https://github.com/hk-vk/txtskills)
 - Skills registry: [github.com/hk-vk/skills](https://github.com/hk-vk/skills)
-- llms.txt standard: [llmstxt.org](https://llmstxt.org/)
+- `llms.txt` standard: [llmstxt.org](https://llmstxt.org/)
 - Agent Skills format: [agentskills.io](https://agentskills.io)
+
+---
 
 ## License
 
