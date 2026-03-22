@@ -1,7 +1,7 @@
 ---
 name: txtskills-llms-to-agent-skills
 description: Convert docs base URLs, llms.txt, or llms-full.txt into installable Agent Skills with txtskills CLI. Use when a user asks to generate, publish, and optionally install a new skill from documentation.
-compatibility: Requires Node.js 20+ and txtskills CLI (`npx txtskills`).
+compatibility: Requires Node.js 20+ and the latest txtskills CLI (`npx txtskills@latest`).
 license: MIT
 ---
 
@@ -16,16 +16,18 @@ Use this skill when you need to turn documentation into a reusable Agent Skill q
   - `example.com`
   - `example.com/llms.txt`
   - `example.com/llms-full.txt`
+  - `example.com/.well-known/llms.txt`
+  - `example.com/.well-known/llms-full.txt`
 - Can install immediately after conversion (interactive or auto)
 
 ## Quick start
 
 ```bash
-npx txtskills convert github.com/llms.txt
+npx txtskills@latest convert github.com/llms.txt
 ```
 
 ```bash
-npx txtskills convert docs.anthropic.com
+npx txtskills@latest convert docs.anthropic.com
 ```
 
 ## Recommended workflow
@@ -46,7 +48,7 @@ When the user gives only a product name (for example: "Google AI Studio"), do th
    - `<domain>/.well-known/llms-full.txt`
 2. If domain is unknown, search web for `"<product> llms.txt"` and `"<product> llms-full.txt"`.
 3. Run conversion:
-   - `npx txtskills convert <best-url>`
+   - `npx txtskills@latest convert <best-url>`
 4. If convert succeeds, offer immediate install.
 5. If multiple valid sources exist, ask user to choose before publishing.
 
@@ -57,7 +59,7 @@ Example user intent this skill should handle:
 ## Command reference
 
 ```bash
-npx txtskills convert <url>
+npx txtskills@latest convert <url>
 ```
 
 Options:
@@ -88,7 +90,7 @@ Use lowercase, hyphenated names (Agent Skills standard):
 - If install is skipped, run:
 
 ```bash
-npx txtskills add <skill-name>
+npx txtskills@latest add <skill-name>
 ```
 
 ## Useful links

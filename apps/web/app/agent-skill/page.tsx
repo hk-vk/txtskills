@@ -17,7 +17,8 @@ export default function AgentSkillPage() {
 
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Use as Agent Skill</h1>
           <p className="mt-3 text-muted-foreground">
-            Install the txtskills conversion skill via native skills CLI, then use it inside your coding agent to find llms.txt and convert it into an agent skill.
+            Install the txtskills conversion workflow skill with the latest skills CLI, then use it
+            inside your coding agent to find llms.txt and convert it into an agent skill.
           </p>
         </header>
 
@@ -26,8 +27,8 @@ export default function AgentSkillPage() {
             title="Install"
             entries={[
               {
-                description: "Install only txtskills conversion workflow skill via skills CLI",
-                command: "npx skills add hk-vk/txtskills --skill txtskills-llms-to-agent-skills",
+                description: "Install only txtskills conversion workflow skill via the latest skills CLI",
+                command: "npx skills@latest add hk-vk/txtskills --skill txtskills-llms-to-agent-skills",
               },
             ]}
           />

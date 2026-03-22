@@ -2,6 +2,8 @@
 
 A command-line interface for converting `llms.txt` documentation into installable agent skills and managing skills from the txtskills registry.
 
+Use `@latest` when you want the newest published CLI release.
+
 The CLI also includes an interactive mode and is useful for scripting.
 
 ---
@@ -23,7 +25,7 @@ It wraps the `skills` CLI for installs and removals, then adds discovery/convers
 Run directly without install:
 
 ```bash
-npx txtskills
+npx txtskills@latest
 ```
 
 That starts an interactive prompt when no command is provided.
@@ -31,7 +33,7 @@ That starts an interactive prompt when no command is provided.
 For a one-liner install:
 
 ```bash
-npx txtskills add <skill-name>
+npx txtskills@latest add <skill-name>
 ```
 
 ---
@@ -43,9 +45,9 @@ npx txtskills add <skill-name>
 Install a skill from the registry.
 
 ```bash
-npx txtskills add next-js
-npx txtskills add ai-sdk --global
-npx txtskills add tailwind-css -y
+npx txtskills@latest add next-js
+npx txtskills@latest add ai-sdk --global
+npx txtskills@latest add tailwind-css -y
 ```
 
 Options:
@@ -62,9 +64,9 @@ If no skill name is provided, the CLI shows a searchable selector.
 List available skills.
 
 ```bash
-npx txtskills list
-npx txtskills ls
-npx txtskills list --json
+npx txtskills@latest list
+npx txtskills@latest ls
+npx txtskills@latest list --json
 ```
 
 Options:
@@ -77,8 +79,8 @@ Options:
 Find skills by name/description, then choose one to install.
 
 ```bash
-npx txtskills search react
-npx txtskills find "llm"
+npx txtskills@latest search react
+npx txtskills@latest find "llm"
 ```
 
 Options:
@@ -92,13 +94,13 @@ Convert a docs URL or `llms.txt` URL directly into a publishable skill.
 If URL is omitted, you are prompted for it.
 
 ```bash
-npx txtskills convert github.com/llms.txt
-npx txtskills convert docs.anthropic.com
-npx txtskills convert docs.python.org --name python-docs
-npx txtskills convert docs.python.org --install
-npx txtskills convert docs.python.org --skip-install
-npx txtskills convert docs.python.org --json
-npx txtskills convert docs.python.org --api https://txtskills.hari.works
+npx txtskills@latest convert github.com/llms.txt
+npx txtskills@latest convert docs.anthropic.com
+npx txtskills@latest convert docs.python.org --name python-docs
+npx txtskills@latest convert docs.python.org --install
+npx txtskills@latest convert docs.python.org --skip-install
+npx txtskills@latest convert docs.python.org --json
+npx txtskills@latest convert docs.python.org --api https://txtskills.hari.works
 ```
 
 Convert options:
@@ -126,8 +128,8 @@ Default behavior:
 Remove installed skills (wrapped from `skills` CLI).
 
 ```bash
-npx txtskills remove <skill-name>
-npx txtskills rm <skill-name>
+npx txtskills@latest remove <skill-name>
+npx txtskills@latest rm <skill-name>
 ```
 
 Options:
@@ -147,20 +149,20 @@ Alias: `rm`
 ### 1) Discover + install workflow
 
 ```bash
-npx txtskills search docker
-npx txtskills add docker
+npx txtskills@latest search docker
+npx txtskills@latest add docker
 ```
 
 ### 2) Convert then install in one command
 
 ```bash
-npx txtskills convert https://docs.example.com/llms.txt --install --global -y
+npx txtskills@latest convert https://docs.example.com/llms.txt --install --global -y
 ```
 
 ### 3) Convert in scripts / automation
 
 ```bash
-npx txtskills convert docs.example.com --json --skip-install > conversion.json
+npx txtskills@latest convert docs.example.com --json --skip-install > conversion.json
 ```
 
 ---

@@ -20,7 +20,7 @@ Generated skills are saved to [hk-vk/skills](https://github.com/hk-vk/skills).
 
 ## 3 ways to use txtskills
 
-The app now exposes three usage modes, matching the UI nav:
+The app exposes three usage modes, matching the UI nav:
 
 1. **Convert (Web)** → `https://txtskills.hari.works/`
 2. **CLI** → `https://txtskills.hari.works/cli`
@@ -38,32 +38,37 @@ Visit **[txtskills.hari.works](https://txtskills.hari.works)** and use the Conve
 
 See `packages/cli/README.md` for the complete command reference.
 
+Use `@latest` when you want the newest published CLI release:
+
 ```bash
+# Start the interactive CLI
+npx txtskills@latest
+
 # Install one skill from the registry
-npx txtskills add <skill-name>
+npx txtskills@latest add <skill-name>
 
 # Convert docs URL -> skill
-npx txtskills convert docs.example.com
+npx txtskills@latest convert docs.example.com
 
 # Convert and auto-install
-npx txtskills convert docs.example.com --install
+npx txtskills@latest convert docs.example.com --install
 
 # Search and list
-npx txtskills search react
-npx txtskills list
+npx txtskills@latest search react
+npx txtskills@latest list
 
 # Remove installed skills
-npx txtskills remove <skill-name>
+npx txtskills@latest remove <skill-name>
 ```
 
 ### 3. Use as an agent skill
 
 For agent workflows that only need a CLI-native experience:
 
-- Install the conversion workflow skill:
+- Install the conversion workflow skill with the latest installer:
 
 ```bash
-npx skills add hk-vk/txtskills --skill txtskills-llms-to-agent-skills
+npx skills@latest add hk-vk/txtskills --skill txtskills-llms-to-agent-skills
 ```
 
 - Use that skill in your coding agent to discover `llms.txt` and generate an agent skill.
@@ -83,7 +88,7 @@ The CLI supports these commands:
 Run without arguments to open an interactive prompt:
 
 ```bash
-npx txtskills
+npx txtskills@latest
 ```
 
 No terminal setup required.

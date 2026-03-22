@@ -17,7 +17,11 @@ export default function CliPage() {
 
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Use via CLI</h1>
           <p className="mt-3 text-muted-foreground">
-            Run conversion, discovery, install, and maintenance directly from terminal.
+            Run conversion, discovery, install, and maintenance directly from terminal. Use{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+              npx txtskills@latest
+            </code>{" "}
+            to always pull the latest CLI release.
           </p>
         </header>
 
@@ -27,19 +31,19 @@ export default function CliPage() {
             entries={[
               {
                 description: "Convert from a direct llms.txt URL",
-                command: "npx txtskills convert https://docs.example.com/llms.txt",
+                command: "npx txtskills@latest convert https://docs.example.com/llms.txt",
               },
               {
                 description: "Convert from docs base URL and set custom skill name",
-                command: "npx txtskills convert docs.example.com --name example-docs",
+                command: "npx txtskills@latest convert docs.example.com --name example-docs",
               },
               {
                 description: "Convert and auto-install after success",
-                command: "npx txtskills convert docs.example.com --install",
+                command: "npx txtskills@latest convert docs.example.com --install",
               },
               {
                 description: "Return JSON output for scripts",
-                command: "npx txtskills convert docs.example.com --json",
+                command: "npx txtskills@latest convert docs.example.com --json",
               },
             ]}
           />
@@ -49,19 +53,19 @@ export default function CliPage() {
             entries={[
               {
                 description: "List all published skills",
-                command: "npx txtskills list",
+                command: "npx txtskills@latest list",
               },
               {
                 description: "Search skills by name",
-                command: "npx txtskills search <query>",
+                command: "npx txtskills@latest search <query>",
               },
               {
                 description: "Install one skill",
-                command: "npx txtskills add <skill-name>",
+                command: "npx txtskills@latest add <skill-name>",
               },
               {
                 description: "Remove one skill",
-                command: "npx txtskills remove <skill-name>",
+                command: "npx txtskills@latest remove <skill-name>",
               },
             ]}
           />
@@ -71,15 +75,15 @@ export default function CliPage() {
             entries={[
               {
                 description: "Force regeneration when existing skill changed",
-                command: "npx txtskills convert <url> --force",
+                command: "npx txtskills@latest convert <url> --force",
               },
               {
                 description: "Skip post-convert install prompt",
-                command: "npx txtskills convert <url> --skip-install",
+                command: "npx txtskills@latest convert <url> --skip-install",
               },
               {
                 description: "Use custom convert API endpoint",
-                command: "npx txtskills convert <url> --api https://txtskills.hari.works",
+                command: "npx txtskills@latest convert <url> --api https://txtskills.hari.works",
               },
             ]}
           />
