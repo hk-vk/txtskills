@@ -1,6 +1,7 @@
 import { Metadata } from "next";
+import { getSiteUrl } from "@/lib/site-url";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+const baseUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Use via CLI | txtskills",

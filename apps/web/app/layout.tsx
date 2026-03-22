@@ -3,13 +3,12 @@ import Script from "next/script";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { GeistPixelCircle } from "geist/font/pixel";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
-
-
 
 const geistPixel = GeistPixelCircle;
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+const baseUrl = getSiteUrl();
 const umamiScriptUrl = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL || "https://cloud.umami.is/script.js";
 const umamiWebsiteId =
   process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || "718bea6c-f729-46f5-92a0-cc9bbdaa75b0";
