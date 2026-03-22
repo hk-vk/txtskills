@@ -218,17 +218,16 @@ export default function Home() {
     <main className="relative min-h-screen bg-background">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.14),transparent_55%)]" />
       <div className="max-w-4xl mx-auto px-5 py-8 md:px-6 md:py-16">
+        <div className="mb-6 flex items-center justify-end">
+          <TopLinksNav />
+        </div>
+
+        <div className="mb-8 flex justify-center">
+          <UsageModeNav active="web" />
+        </div>
 
         {/* Header */}
-        <header className="mb-16 relative ui-enter">
-          <div className="mb-8 flex items-center justify-end">
-            <TopLinksNav />
-          </div>
-
-          <div className="mb-8 flex justify-center">
-            <UsageModeNav active="web" />
-          </div>
-
+        <header className="mb-8 relative ui-enter">
           {/* Decorative background */}
           <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -320,11 +319,11 @@ export default function Home() {
               </svg>
             </div>
 
-            <p className="text-muted-foreground tracking-[0.3em] text-xs uppercase mt-4 font-mono">
+            <p className="text-muted-foreground tracking-[0.3em] text-xs uppercase mt-3 font-mono">
               llms.txt → agent skills
             </p>
 
-            <p className="text-pretty text-lg md:text-xl text-muted-foreground max-w-xl mt-6 leading-relaxed mx-auto md:mx-0">
+            <p className="text-pretty text-lg md:text-xl text-muted-foreground max-w-xl mt-4 leading-relaxed mx-auto md:mx-0">
               Convert any <a href="https://llmstxt.org/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity"><code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono border border-border/50">llms.txt</code></a> documentation into an installable <a href="https://agentskills.io/home" target="_blank" rel="noopener noreferrer" className="text-foreground border-b border-border hover:border-foreground transition-colors pb-0.5">skill</a> for AI agents.
             </p>
           </div>
