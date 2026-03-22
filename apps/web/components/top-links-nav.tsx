@@ -22,27 +22,24 @@ export function TopLinksNav() {
   const pathname = usePathname();
   const isSkillsPage = pathname?.startsWith("/skills");
 
+  const linkClass = (active: boolean) =>
+    [
+      "transition-colors underline-offset-4 decoration-border/60 hover:decoration-foreground/60",
+      active
+        ? "text-foreground underline decoration-foreground/70"
+        : "text-muted-foreground hover:text-foreground hover:underline",
+    ].join(" ");
+
   return (
-    <nav
-      aria-label="Primary"
-      className="inline-flex items-center gap-1 rounded-lg border border-border/40 bg-background/50 p-1 text-xs sm:text-sm"
-    >
-      <Link
-        href="/skills"
-        aria-current={isSkillsPage ? "page" : undefined}
-        className={`rounded-md px-2.5 py-1.5 transition-colors ${
-          isSkillsPage
-            ? "bg-muted text-foreground"
-            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-        }`}
-      >
+    <nav aria-label="Primary" className="inline-flex items-center gap-4 text-xs sm:text-sm">
+      <Link href="/skills" aria-current={isSkillsPage ? "page" : undefined} className={linkClass(Boolean(isSkillsPage))}>
         Browse Skills
       </Link>
       <a
         href="https://github.com/hk-vk/txtskills"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors underline-offset-4 decoration-border/60 hover:text-foreground hover:underline hover:decoration-foreground/60"
       >
         <GitHubIcon className="size-3.5" />
         Star on GitHub
