@@ -1,6 +1,6 @@
 {
     "name": "txtskills",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "Install agent skills from the txtskills registry — llms.txt docs converted into portable skills for Claude Code, Cursor, Windsurf, Copilot, and more",
     "type": "module",
     "bin": {

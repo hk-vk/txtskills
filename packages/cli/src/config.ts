@@ -1,5 +1,5 @@
 /** CLI version — single source of truth */
-export const VERSION = "0.2.2";
+export const VERSION = "0.2.3";
 
 /** Default GitHub owner for the skills registry */
 export const DEFAULT_OWNER = "hk-vk";
