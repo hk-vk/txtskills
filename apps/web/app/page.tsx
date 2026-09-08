@@ -222,9 +222,6 @@ export default function Home() {
           <TopLinksNav />
         </div>
 
-        <div className="mb-8 flex justify-center">
-          <UsageModeNav active="web" />
-        </div>
 
         {/* Header */}
         <header className="mb-8 relative ui-enter">
@@ -326,6 +323,9 @@ export default function Home() {
             <p className="text-pretty text-lg md:text-xl text-muted-foreground max-w-xl mt-4 leading-relaxed mx-auto md:mx-0">
               Convert any <a href="https://llmstxt.org/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity"><code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono border border-border/50">llms.txt</code></a> documentation into an installable <a href="https://agentskills.io/home" target="_blank" rel="noopener noreferrer" className="text-foreground border-b border-border hover:border-foreground transition-colors pb-0.5">skill</a> for AI agents.
             </p>
+          </div>
+          <div className="mt-8 flex justify-center">
+            <UsageModeNav active="web" />
           </div>
 
           {/* Decorative corner elements */}
