@@ -8,6 +8,24 @@ import { useSkillsCache } from "@/hooks/use-skills-cache";
 import { useInstallStats } from "@/hooks/use-install-stats";
 
 const SKILLS_PER_PAGE = 10;
+type SortOption = "updated" | "created" | "name";
+
+const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : DATE_FORMATTER.format(date);
+}
+
+function getTimestamp(value: string | null | undefined) {
+  return value ? Date.parse(value) || 0 : 0;
+}
 
 export default function SkillsPage() {
   const { skills, loading } = useSkillsCache();
@@ -15,18 +33,27 @@ export default function SkillsPage() {
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("updated");
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Filter skills based on search query
+  // Filter and sort skills based on the current controls
   const filteredSkills = useMemo(() => {
-    if (!searchQuery.trim()) return skills;
     const query = searchQuery.toLowerCase().trim();
-    return skills.filter(
-      (skill) =>
-        skill.name.toLowerCase().includes(query) ||
-        skill.metadata?.sourceUrl?.toLowerCase().includes(query)
-    );
-  }, [skills, searchQuery]);
+    const matchingSkills = query
+      ? skills.filter(
+          (skill) =>
+            skill.name.toLowerCase().includes(query) ||
+            skill.metadata?.sourceUrl?.toLowerCase().includes(query)
+        )
+      : skills;
+
+    return [...matchingSkills].sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+
+      const aDate = sortBy === "created" ? a.metadata?.generatedAt : a.metadata?.updatedAt;
+      const bDate = sortBy === "created" ? b.metadata?.generatedAt : b.metadata?.updatedAt;
+      return getTimestamp(bDate) - getTimestamp(aDate) || a.name.localeCompare(b.name);
+    });
+  }, [skills, searchQuery, sortBy]);
 
   // Paginate filtered skills
   const totalPages = Math.ceil(filteredSkills.length / SKILLS_PER_PAGE);
@@ -66,37 +93,55 @@ export default function SkillsPage() {
 
         {/* Search Bar */}
         {!loading && skills.length > 0 && (
-          <div className="mb-8 relative max-w-xl">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.3-4.3"/>
-              </svg>
-            </div>
-            <Input
-              type="search"
-              placeholder="Search skills..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery("");
+          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="relative w-full max-w-xl flex-1">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                </svg>
+              </div>
+              <Input
+                type="search"
+                placeholder="Search skills..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="pl-10"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6 6 18"/>
+                    <path d="m6 6 12 12"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+            <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+              <span>Sort by</span>
+              <select
+                aria-label="Sort skills"
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value as SortOption);
+                  setCurrentPage(1);
+                }}
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 6 6 18"/>
-                  <path d="m6 6 12 12"/>
-                </svg>
-              </button>
-            )}
+                <option value="updated">Recently updated</option>
+                <option value="created">Recently added</option>
+                <option value="name">Name (A–Z)</option>
+              </select>
+            </label>
           </div>
         )}
 
@@ -144,6 +189,16 @@ export default function SkillsPage() {
                       <p className="text-xs text-muted-foreground truncate mt-1">
                         {skill.metadata.sourceUrl}
                       </p>
+                    )}
+                    {(formatDate(skill.metadata?.generatedAt) || formatDate(skill.metadata?.updatedAt)) && (
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground/70">
+                        {formatDate(skill.metadata?.generatedAt) && (
+                          <span>Added {formatDate(skill.metadata?.generatedAt)}</span>
+                        )}
+                        {formatDate(skill.metadata?.updatedAt) && (
+                          <span>Updated {formatDate(skill.metadata?.updatedAt)}</span>
+                        )}
+                      </div>
                     )}
                   </div>
 
