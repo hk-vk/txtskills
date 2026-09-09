@@ -31,6 +31,11 @@ assert.match(markdown.body, /## When to use this/);
 const notFound = await get("/path-that-does-not-exist");
 assert.equal(notFound.response.status, 404);
 assert.match(visibleText(notFound.body), /llms\.txt|sitemap/i);
+const markdownNotFound = await get("/path-that-does-not-exist", { Accept: "text/markdown" });
+assert.equal(markdownNotFound.response.status, 404);
+assert.match(markdownNotFound.response.headers.get("content-type") || "", /^text\/markdown/i);
+assert.match(markdownNotFound.body, /sitemap\.xml|llms\.txt/);
+
 
 for (const path of ["/about", "/contact", "/privacy"]) {
   const page = await get(path);

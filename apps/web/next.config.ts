@@ -15,17 +15,30 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@txtskills/ui"],
   async rewrites() {
     return {
-      beforeFiles: markdownPaths.map((path) => ({
-        source: path,
-        has: [
-          {
-            type: "header" as const,
-            key: "accept",
-            value: "(.*)text/markdown(.*)",
-          },
-        ],
-        destination: path === "/" ? "/api/markdown/__home" : `/api/markdown${path}`,
-      })),
+      beforeFiles: [
+        ...markdownPaths.map((path) => ({
+          source: path,
+          has: [
+            {
+              type: "header" as const,
+              key: "accept",
+              value: "(.*)text/markdown(.*)",
+            },
+          ],
+          destination: path === "/" ? "/api/markdown/__home" : `/api/markdown${path}`,
+        })),
+        {
+          source: "/:path*",
+          has: [
+            {
+              type: "header" as const,
+              key: "accept",
+              value: "(.*)text/markdown(.*)",
+            },
+          ],
+          destination: "/api/markdown/:path*",
+        },
+      ],
     };
   },
   async headers() {

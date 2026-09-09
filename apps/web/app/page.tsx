@@ -518,6 +518,18 @@ export default function Home() {
               </div>
             </section>
 
+            <section aria-labelledby="agent-workflow-heading" className="max-w-2xl space-y-2 text-xs leading-6 text-muted-foreground/75">
+              <h2 id="agent-workflow-heading" className="font-semibold uppercase tracking-widest text-muted-foreground/80">
+                Agent workflow
+              </h2>
+              <p>
+                Start with a public framework, SDK, API, or product documentation URL. txtskills fetches the llms.txt source, turns its structured links into focused agent context, and returns an installable SKILL.md plus a command for the published registry. The result is designed to be reused instead of pasting the same documentation into every coding session.
+              </p>
+              <p>
+                Choose Web mode when you want to inspect one result, CLI mode when you need repeatable automation or installation, and Agent Skills mode when you want Claude Code, Codex, Cursor, Hermes, OpenCode, Windsurf, Copilot, Amp, Antigravity, or another compatible agent to run the workflow. Keep secrets and private documentation out of requests.
+              </p>
+            </section>
+
             <details className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground/80 hover:text-foreground [&::-webkit-details-marker]:hidden">
                 <span role="heading" aria-level={2}>When to use txtskills</span>

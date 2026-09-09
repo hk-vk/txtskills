@@ -16,7 +16,10 @@ export async function GET(
   { params }: { params: Promise<{ slug?: string[] }> },
 ) {
   const { slug = [] } = await params;
-  const pathname = `/${slug.join("/")}` || "/";
+  const rawPathname = `/${slug.join("/")}` || "/";
+  const pathname = rawPathname.startsWith("/api/markdown")
+    ? rawPathname.slice("/api/markdown".length) || "/"
+    : rawPathname;
   const markdown = markdownForPath(pathname);
   const headers = {
     "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
