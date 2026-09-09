@@ -237,7 +237,7 @@ export default function Home() {
           {/* Main title section */}
           <div className="text-center md:text-left">
             <div className="inline-block relative">
-              <h1 className="sr-only" itemProp="name">txtskills</h1>
+              <h1 className="sr-only" itemProp="name">txtskills: Convert llms.txt to Agent Skills</h1>
               <svg
                 aria-hidden="true"
                 viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
@@ -517,6 +517,37 @@ export default function Home() {
                 </div>
               </div>
             </section>
+
+            <details className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground/80 hover:text-foreground [&::-webkit-details-marker]:hidden">
+                <span role="heading" aria-level={2}>When to use txtskills</span>
+                <svg
+                  aria-hidden="true"
+                  className="size-4 shrink-0 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </summary>
+              <div className="mt-3 space-y-3">
+                <p>
+                  txtskills turns public llms.txt documentation into reusable Agent Skills for coding agents. Use Web mode for a quick one-off conversion, CLI mode with <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">npx txtskills@latest</code> for repeatable scripts and installs, or Agent Skills mode when you want an agent to find the source and run the workflow.
+                </p>
+                <p>
+                  The generated workflow is useful with Claude Code, Codex, Cursor, Windsurf, Hermes, OpenCode, GitHub Copilot, Amp, Antigravity, and other agents that can run shell commands or install Agent Skills. Start with a public framework, SDK, API, or product documentation URL; do not submit secrets or private documentation.
+                </p>
+              </div>
+            </details>
+
+            <nav aria-label="Trust and documentation" className="flex flex-wrap gap-4 text-xs text-muted-foreground/70">
+              <a className="underline-offset-4 hover:text-foreground hover:underline" href="/about">About</a>
+              <a className="underline-offset-4 hover:text-foreground hover:underline" href="/contact">Contact</a>
+              <a className="underline-offset-4 hover:text-foreground hover:underline" href="/privacy">Privacy</a>
+              <a className="underline-offset-4 hover:text-foreground hover:underline" href="/llms.txt">Agent instructions</a>
+            </nav>
           </div>
         )}
 

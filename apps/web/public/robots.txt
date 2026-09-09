@@ -1,26 +1,41 @@
-# Allow search engines to crawl and index
-User-agent: *
+# AI crawlers that can provide search, coding-agent, or citation value
+User-agent: GPTBot
 Allow: /
-Allow: /skills
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: DeepSeekBot
+Allow: /
+
+# General crawling policy
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
 Disallow: /api/
 Disallow: /.next/
 Disallow: /private/
 
-# Specific rules for Googlebot
-User-agent: Googlebot
-Allow: /
-Allow: /skills
-Disallow: /api/
-
-# Specific rules for Bingbot
-User-agent: Bingbot
-Allow: /
-Allow: /skills
-Disallow: /api/
-
-# Crawl delay
-Crawl-delay: 1
-Request-rate: 30/60
-
-# Sitemaps
-Sitemap: /sitemap.xml
+# Machine-readable entry points
+Sitemap: https://txtskills.hari.works/sitemap.xml

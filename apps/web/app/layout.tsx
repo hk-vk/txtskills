@@ -77,25 +77,44 @@ export default function RootLayout({
 }>) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "txtskills",
-    description: "Convert llms.txt documentation to installable agent skills for Claude Code, Cursor, Windsurf, and other AI agents",
-    url: baseUrl,
-    applicationCategory: "DeveloperApplication",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
-    featureList: [
-      "Convert llms.txt to agent skills",
-      "Support for Claude Code",
-      "Support for Cursor",
-      "Support for Windsurf",
-      "Support for Amp code",
-      "Support for GitHub Copilot",
-      "Instant skill generation",
-      "GitHub publishing",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${baseUrl}#application`,
+        name: "txtskills",
+        description: "Convert llms.txt documentation to installable agent skills for Claude Code, Codex, Cursor, Windsurf, Hermes, OpenCode, and other AI agents",
+        url: baseUrl,
+        applicationCategory: "DeveloperApplication",
+        publisher: { "@id": `${baseUrl}#organization` },
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+        featureList: [
+          "Convert llms.txt to agent skills",
+          "Web, CLI, and Agent Skills modes",
+          "Support for Claude Code, Codex, Cursor, Windsurf, Hermes, and OpenCode",
+          "Instant skill generation",
+          "GitHub publishing",
+        ],
+      },
+      {
+        "@type": "Organization",
+        "@id": `${baseUrl}#organization`,
+        name: "txtskills",
+        url: baseUrl,
+        sameAs: [
+          "https://github.com/hk-vk/txtskills",
+          "https://github.com/hk-vk/skills",
+        ],
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "technical support",
+          url: `${baseUrl}/contact`,
+          availableLanguage: "English",
+        },
+      },
     ],
   };
 
